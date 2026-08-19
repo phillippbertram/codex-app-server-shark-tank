@@ -1,7 +1,16 @@
-import { AlertTriangle, CirclePlus, FishSymbol, LoaderCircle, RotateCcw, X } from "lucide-react";
-import { useEffect } from "react";
+import {
+  AlertTriangle,
+  CirclePlus,
+  FishSymbol,
+  LoaderCircle,
+  RotateCcw,
+  Settings2,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { ApprovalModal } from "./components/ApprovalModal";
 import { CreatePitch } from "./components/CreatePitch";
+import { SettingsDialog } from "./components/SettingsDialog";
 import { Badge, Button } from "./components/ui";
 import { Verdict } from "./components/Verdict";
 import { WorkflowDashboard } from "./components/WorkflowDashboard";
@@ -13,6 +22,7 @@ export function App() {
     initialized,
     initialize,
     codex,
+    workflow,
     projects,
     active,
     selectProject,
@@ -20,6 +30,7 @@ export function App() {
     error,
     clearError,
   } = useAppStore();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     void initialize();
@@ -89,7 +100,17 @@ export function App() {
           </div>
         </nav>
 
-        <div className="border-t border-white/[0.11] p-4">
+        <div className="border-t border-white/[0.11] px-3 pb-1 pt-3">
+          <Button
+            className="w-full justify-start"
+            variant="ghost"
+            onClick={() => setSettingsOpen(true)}
+          >
+            <Settings2 className="size-4" /> Configuration
+          </Button>
+        </div>
+
+        <div className="p-4 pt-2">
           <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.045] p-3">
             <span
               className={cn(
@@ -147,6 +168,12 @@ export function App() {
         </div>
       ) : null}
       <ApprovalModal />
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        workflow={workflow}
+        models={codex.models ?? []}
+      />
     </div>
   );
 }

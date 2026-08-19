@@ -24,6 +24,7 @@ export function registerIpc(
     const activeId = requested?.success ? requested.data : projects[0]?.id;
     return {
       codex: codex.getStatus(),
+      workflow: store.getWorkflow(),
       projects,
       ...(activeId ? { activeProject: await store.snapshot(activeId) } : {}),
       pendingApprovals: workflow.getApprovals(),

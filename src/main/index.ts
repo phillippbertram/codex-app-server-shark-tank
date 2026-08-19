@@ -17,7 +17,7 @@ async function createApplication(): Promise<void> {
   await store.initialize();
 
   codex = new CodexAppServer(root);
-  const workflow = new WorkflowEngine(root, workflowDefinition, store, codex);
+  const workflow = new WorkflowEngine(workflowDefinition, store, codex);
   registerIpc(store, workflow, codex);
 
   mainWindow = new BrowserWindow({

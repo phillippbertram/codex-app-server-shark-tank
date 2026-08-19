@@ -6,6 +6,7 @@ import type {
   HumanSubmitInput,
   ProjectSnapshot,
   ProjectSummary,
+  WorkflowDefinition,
 } from "@shared/types";
 import { create } from "zustand";
 import { errorMessage } from "../lib";
@@ -15,6 +16,7 @@ type AppState = {
   busy: boolean;
   error?: string;
   codex: CodexStatus;
+  workflow?: WorkflowDefinition;
   projects: ProjectSummary[];
   active?: ProjectSnapshot;
   approvals: ApprovalRequest[];
@@ -47,6 +49,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({
         initialized: true,
         codex: bootstrap.codex,
+        workflow: bootstrap.workflow,
         projects: bootstrap.projects,
         active: bootstrap.activeProject,
         approvals: bootstrap.pendingApprovals,
@@ -63,6 +66,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({
         active: bootstrap.activeProject,
         codex: bootstrap.codex,
+        workflow: bootstrap.workflow,
         approvals: bootstrap.pendingApprovals,
         busy: false,
       });

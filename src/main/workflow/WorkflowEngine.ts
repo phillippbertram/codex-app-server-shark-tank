@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
-import { access, readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { access } from "node:fs/promises";
 import { committeeQuestionsSchema } from "../../shared/schemas.js";
 import type {
   AppEvent,
@@ -50,7 +49,6 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
   private readonly pendingApprovals = new Map<string, PendingApproval>();
 
   constructor(
-    private readonly root: string,
     private readonly workflow: WorkflowDefinition,
     private readonly store: ProjectStore,
     private readonly codex: CodexAppServer,
@@ -141,6 +139,8 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
           node.durationMs = undefined;
           node.threadId = undefined;
           node.turnId = undefined;
+          node.model = undefined;
+          node.reasoningEffort = undefined;
         }
       }
       current.status = "running";
@@ -169,6 +169,8 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
       node.durationMs = undefined;
       node.threadId = undefined;
       node.turnId = undefined;
+      node.model = undefined;
+      node.reasoningEffort = undefined;
       current.status = "running";
       current.updatedAt = new Date().toISOString();
     });
@@ -260,7 +262,7 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
         const running = Object.values(current.nodes).filter(
           (node) => node.status === "running",
         ).length;
-        let availableAgentSlots = Math.max(0, 2 - running);
+        let availableAgentSlots = Math.max(0, this.workflow.defaults.maxParallelAgents - running);
 
         for (const definition of this.workflow.nodes) {
           const node = current.nodes[definition.id];
@@ -319,24 +321,33 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
       if (this.codex.getStatus().state !== "ready") {
         throw new Error(this.codex.getStatus().message);
       }
-      if (!definition.agent) throw new Error("Agent definition is missing");
-      const instructions = await readFile(resolve(this.root, "agents", definition.agent), "utf8");
+      if (!definition.agent || !definition.instructions) {
+        throw new Error("Agent definition is missing");
+      }
+      const configuredModel = definition.model ?? this.workflow.defaults.model;
       await this.log(projectId, runId, {
         direction: "client",
         method: "thread/start",
         nodeId: definition.id,
         summary: `Starting ephemeral thread for ${definition.label}`,
-        data: { cwd: projectRoot, ephemeral: true, sandbox: "workspace-write" },
+        data: {
+          cwd: projectRoot,
+          ephemeral: true,
+          sandbox: "workspace-write",
+          model: configuredModel,
+          modelSource: definition.model ? "agent override" : "workflow default",
+        },
       });
 
       const thread = await this.codex.startThread({
+        model: configuredModel,
         cwd: projectRoot,
         approvalPolicy: "on-request",
         approvalsReviewer: "user",
         sandbox: "workspace-write",
         baseInstructions:
           "You are a focused local analyst inside a workflow demo. Follow the developer instructions and use only the project files named in the turn. Do not inspect global memory, configuration, account, skill, plugin, or agent files. Do not use web search, MCP tools, plugins, network access, or subagents. Use local file and command tools only when needed to create and verify the requested project artifacts.",
-        developerInstructions: instructions,
+        developerInstructions: definition.instructions,
         serviceName: "startup-shark-tank",
         ephemeral: true,
       });
@@ -354,6 +365,8 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
 
       await this.mutateNode(projectId, definition.id, (node) => {
         node.threadId = threadId;
+        node.model = thread.model;
+        node.reasoningEffort = thread.reasoningEffort ?? undefined;
         node.activity = "Thread ready; sending the turn";
       });
       await this.log(projectId, runId, {
@@ -362,7 +375,11 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
         nodeId: definition.id,
         threadId,
         summary: `Thread ${shortId(threadId)} started with ${thread.model}`,
-        data: { model: thread.model, modelProvider: thread.modelProvider },
+        data: {
+          model: thread.model,
+          modelProvider: thread.modelProvider,
+          reasoningEffort: thread.reasoningEffort,
+        },
       });
 
       const turnParams: TurnStartParams = {

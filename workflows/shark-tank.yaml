@@ -1,6 +1,10 @@
 id: shark-tank-v1
 name: Startup Shark Tank
 description: A visible investment committee workflow powered by isolated Codex App Server threads.
+source: workflows/shark-tank.yaml
+defaults:
+  model: gpt-5.6-terra
+  maxParallelAgents: 2
 nodes:
   - id: market
     label: Market Scout
@@ -100,4 +104,3 @@ nodes:
       - founder-rebuttal
     outputs:
       - investment-memo.md
-

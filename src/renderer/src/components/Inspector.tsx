@@ -40,6 +40,8 @@ export function Inspector({
             <Meta label="Turn" value={state.turnId?.slice(0, 12) ?? "—"} />
             <Meta label="Attempt" value={String(state.attempt)} />
             <Meta label="Runtime" value={formatDuration(state.durationMs)} />
+            <Meta label="Model" value={state.model ?? "—"} />
+            <Meta label="Reasoning" value={state.reasoningEffort ?? "model default"} />
           </div>
         ) : null}
       </header>

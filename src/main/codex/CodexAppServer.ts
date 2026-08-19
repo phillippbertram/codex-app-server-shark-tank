@@ -4,6 +4,7 @@ import type { InitializeParams } from "./generated/InitializeParams.js";
 import type { InitializeResponse } from "./generated/InitializeResponse.js";
 import type { RequestId } from "./generated/RequestId.js";
 import type { GetAccountResponse } from "./generated/v2/GetAccountResponse.js";
+import type { ModelListResponse } from "./generated/v2/ModelListResponse.js";
 import type { ThreadStartParams } from "./generated/v2/ThreadStartParams.js";
 import type { ThreadStartResponse } from "./generated/v2/ThreadStartResponse.js";
 import type { TurnInterruptParams } from "./generated/v2/TurnInterruptParams.js";
@@ -85,10 +86,27 @@ export class CodexAppServer extends EventEmitter<CodexEvents> {
           userAgent: initialized.userAgent,
         });
       } else {
+        const modelCatalog = await this.client
+          .request<ModelListResponse>("model/list", { limit: 50, includeHidden: false })
+          .catch(() => undefined);
         this.setStatus({
           state: "ready",
           message: "Codex App Server connected",
           userAgent: initialized.userAgent,
+          ...(modelCatalog
+            ? {
+                models: modelCatalog.data.map((model) => ({
+                  id: model.id,
+                  displayName: model.displayName,
+                  description: model.description,
+                  isDefault: model.isDefault,
+                  defaultReasoningEffort: model.defaultReasoningEffort,
+                  supportedReasoningEfforts: model.supportedReasoningEfforts.map(
+                    (option) => option.reasoningEffort,
+                  ),
+                })),
+              }
+            : {}),
         });
       }
     } catch (error) {

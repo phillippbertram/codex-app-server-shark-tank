@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
+import matter from "gray-matter";
 import YAML from "yaml";
 import { z } from "zod";
 import type { WorkflowDefinition } from "../../shared/types.js";
@@ -30,12 +31,22 @@ const workflowSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   description: z.string().min(1),
+  source: z.string().min(1),
+  defaults: z.object({
+    model: z.string().min(1),
+    maxParallelAgents: z.number().int().min(1).max(8),
+  }),
   nodes: z.array(z.discriminatedUnion("type", [agentNode, humanNode])).min(1),
+});
+
+const agentSettingsSchema = z.object({
+  model: z.string().min(1).optional(),
 });
 
 export async function loadWorkflow(root: string, file = "workflows/shark-tank.yaml") {
   const parsed = workflowSchema.parse(YAML.parse(await readFile(resolve(root, file), "utf8")));
   const ids = new Set<string>();
+  assertSafeRelativePath(parsed.source);
 
   for (const node of parsed.nodes) {
     if (ids.has(node.id)) throw new Error(`Duplicate workflow node: ${node.id}`);
@@ -47,15 +58,30 @@ export async function loadWorkflow(root: string, file = "workflows/shark-tank.ya
     }
     for (const output of node.outputs) assertSafeRelativePath(output);
     if (node.type === "agent") {
+      assertSafeRelativePath(node.agent);
       const agentPath = resolve(root, "agents", node.agent);
-      await readFile(agentPath, "utf8");
+      const document = matter(await readFile(agentPath, "utf8"));
+      agentSettingsSchema.parse(document.data);
+      if (!document.content.trim()) throw new Error(`Agent instructions are empty: ${node.agent}`);
     } else {
       if (node.form.source) assertSafeRelativePath(node.form.source);
       for (const context of node.form.context ?? []) assertSafeRelativePath(context);
     }
   }
   assertAcyclic(parsed.nodes);
-  return parsed as WorkflowDefinition;
+  const nodes = await Promise.all(
+    parsed.nodes.map(async (node) => {
+      if (node.type !== "agent") return node;
+      const document = matter(await readFile(resolve(root, "agents", node.agent), "utf8"));
+      const settings = agentSettingsSchema.parse(document.data);
+      return {
+        ...node,
+        ...(settings.model ? { model: settings.model } : {}),
+        instructions: document.content.trim(),
+      };
+    }),
+  );
+  return { ...parsed, nodes } as WorkflowDefinition;
 }
 
 export function assertSafeRelativePath(path: string): void {

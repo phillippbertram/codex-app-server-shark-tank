@@ -2,6 +2,16 @@ export type CodexStatus = {
   state: "stopped" | "starting" | "ready" | "not_authenticated" | "error";
   message: string;
   userAgent?: string;
+  models?: CodexModelSummary[];
+};
+
+export type CodexModelSummary = {
+  id: string;
+  displayName: string;
+  description: string;
+  isDefault: boolean;
+  defaultReasoningEffort: string;
+  supportedReasoningEfforts: string[];
 };
 
 export type NodeStatus =
@@ -18,6 +28,8 @@ export type WorkflowNodeDefinition = {
   label: string;
   type: "agent" | "human-input";
   agent?: string;
+  model?: string;
+  instructions?: string;
   dependsOn: string[];
   outputs: string[];
   form?: {
@@ -32,6 +44,11 @@ export type WorkflowDefinition = {
   id: string;
   name: string;
   description: string;
+  source: string;
+  defaults: {
+    model: string;
+    maxParallelAgents: number;
+  };
   nodes: WorkflowNodeDefinition[];
 };
 
@@ -44,6 +61,8 @@ export type WorkflowNodeState = {
   attempt: number;
   threadId?: string;
   turnId?: string;
+  model?: string;
+  reasoningEffort?: string;
   activity?: string;
   error?: string;
 };
@@ -124,6 +143,7 @@ export type ProjectSnapshot = {
 
 export type AppBootstrap = {
   codex: CodexStatus;
+  workflow: WorkflowDefinition;
   projects: ProjectSummary[];
   activeProject?: ProjectSnapshot;
   pendingApprovals: ApprovalRequest[];

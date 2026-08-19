@@ -63,6 +63,10 @@ export class ProjectStore {
     }
   }
 
+  getWorkflow(): WorkflowDefinition {
+    return this.workflow;
+  }
+
   async create(name: string, pitch: string, targetMarket: string): Promise<ProjectSnapshot> {
     const baseId = slugify(name) || "startup";
     let id = baseId;

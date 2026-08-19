@@ -57,6 +57,26 @@ Market Scout
 
 The generic engine only knows `agent` and `human-input` nodes. The Shark Tank itself is described by [`workflows/shark-tank.yaml`](workflows/shark-tank.yaml), with specialist behavior in [`agents/shark-tank`](agents/shark-tank).
 
+## Workflow and model configuration
+
+The workflow defines a default model and concurrency limit:
+
+```yaml
+defaults:
+  model: gpt-5.6-terra
+  maxParallelAgents: 2
+```
+
+An agent can override the workflow model through frontmatter in its Markdown definition:
+
+```yaml
+---
+model: gpt-5.6-sol
+---
+```
+
+Omit the frontmatter to inherit the workflow default. The application exposes the workflow, effective model selection, available local Codex models, dependencies, outputs, and complete agent instructions in the read-only Configuration dialog.
+
 ## Project output
 
 Each pitch is stored under `projects/<slug>/`:
