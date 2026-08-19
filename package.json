@@ -21,7 +21,9 @@
     "dist:mac:arm64": "pnpm build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --arm64",
     "dist:mac:x64": "pnpm build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --x64",
     "dist:mac:signed": "pnpm build && electron-builder --mac",
-    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "video:studio": "remotion studio video/index.ts --no-open",
+    "video:render": "remotion render video/index.ts StartupSharkTankExplainer dist/startup-shark-tank-explainer.mp4 --codec=h264 --pixel-format=yuv420p --muted",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.video.json",
     "lint": "biome check .",
     "format": "biome format --write .",
     "codex:generate": "codex app-server generate-ts --out src/main/codex/generated"
@@ -44,6 +46,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.9",
+    "@remotion/cli": "^4.0.513",
+    "@remotion/transitions": "4.0.513",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.18",
@@ -52,6 +56,7 @@
     "electron": "^43.4.0",
     "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
+    "remotion": "^4.0.513",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vite": "7.2.2"
