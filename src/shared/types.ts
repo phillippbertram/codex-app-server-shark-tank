@@ -180,6 +180,7 @@ export interface SharkTankApi {
   bootstrap(projectId?: string): Promise<AppBootstrap>;
   listProjects(): Promise<ProjectSummary[]>;
   createProject(input: CreateProjectInput): Promise<ProjectSnapshot>;
+  deleteProject(projectId: string): Promise<ProjectSummary[]>;
   startWorkflow(projectId: string): Promise<ProjectSnapshot>;
   stopWorkflow(projectId: string): Promise<ProjectSnapshot>;
   resumeWorkflow(projectId: string): Promise<ProjectSnapshot>;

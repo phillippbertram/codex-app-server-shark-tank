@@ -8,6 +8,7 @@ import type {
 import {
   AlertCircle,
   Braces,
+  CalendarDays,
   Check,
   Circle,
   FileText,
@@ -20,7 +21,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useState } from "react";
-import { cn, formatDuration } from "../lib";
+import { cn, formatDuration, formatProjectDate } from "../lib";
 import { useAppStore } from "../store/useAppStore";
 import { ArtifactDialog } from "./ArtifactDialog";
 import { HumanGate } from "./HumanGate";
@@ -66,6 +67,10 @@ export function WorkflowDashboard({ snapshot }: { snapshot: ProjectSnapshot }) {
                 </Badge>
                 <span className="text-xs text-slate-400">
                   {completedCount}/{snapshot.workflow.nodes.length} decisions complete
+                </span>
+                <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                  <CalendarDays className="size-3.5" />
+                  {formatProjectDate(snapshot.project.createdAt)}
                 </span>
               </div>
               <h1 className="mt-2 truncate text-2xl font-semibold tracking-tight text-white">

@@ -35,6 +35,18 @@ export function registerIpc(
     const input = createProjectSchema.parse(raw);
     return store.create(input.name, input.pitch, input.targetMarket);
   });
+  ipcMain.handle(IPC.projectDelete, async (_event, raw: unknown) => {
+    const projectId = projectIdSchema.parse(raw);
+    const state = await store.readState(projectId);
+    const hasRunningNode = Object.values(state?.nodes ?? {}).some(
+      (node) => node.status === "running",
+    );
+    if (state?.status === "running" || hasRunningNode) {
+      throw new Error("Stop the running pitch before moving it to Trash");
+    }
+    await shell.trashItem(store.projectRoot(projectId));
+    return store.list();
+  });
   ipcMain.handle(IPC.workflowStart, (_event, raw: unknown) =>
     workflow.start(projectIdSchema.parse(raw)),
   );

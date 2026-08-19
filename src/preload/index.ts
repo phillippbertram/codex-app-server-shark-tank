@@ -18,6 +18,8 @@ const api: SharkTankApi = {
   listProjects: () => ipcRenderer.invoke(IPC.projectList) as Promise<ProjectSummary[]>,
   createProject: (input: CreateProjectInput) =>
     ipcRenderer.invoke(IPC.projectCreate, input) as Promise<ProjectSnapshot>,
+  deleteProject: (projectId: string) =>
+    ipcRenderer.invoke(IPC.projectDelete, projectId) as Promise<ProjectSummary[]>,
   startWorkflow: (projectId: string) =>
     ipcRenderer.invoke(IPC.workflowStart, projectId) as Promise<ProjectSnapshot>,
   stopWorkflow: (projectId: string) =>

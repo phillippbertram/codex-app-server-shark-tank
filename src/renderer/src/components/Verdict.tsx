@@ -1,9 +1,19 @@
 import type { ArtifactContent, ArtifactSummary, ProjectSnapshot } from "@shared/types";
-import { Braces, CheckCircle2, FileText, FolderOpen, ShieldAlert, Trophy } from "lucide-react";
+import {
+  Braces,
+  CalendarDays,
+  CheckCircle2,
+  FileText,
+  FolderOpen,
+  ShieldAlert,
+  Trophy,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { formatProjectDate } from "../lib";
 import { ArtifactDialog } from "./ArtifactDialog";
+import { CircularProgress } from "./CircularProgress";
 import { Inspector } from "./Inspector";
 import { Button, Card } from "./ui";
 
@@ -17,7 +27,8 @@ export function Verdict({ snapshot }: { snapshot: ProjectSnapshot }) {
   }, [snapshot.project.id]);
 
   const verdict = String(memo?.frontmatter.verdict ?? "DECIDING").toUpperCase();
-  const score = Number(memo?.frontmatter.score ?? 0);
+  const rawScore = memo ? Number(memo.frontmatter.score) : undefined;
+  const score = rawScore !== undefined && Number.isFinite(rawScore) ? rawScore : undefined;
   const invest = verdict === "INVEST";
 
   return (
@@ -40,9 +51,16 @@ export function Verdict({ snapshot }: { snapshot: ProjectSnapshot }) {
               {verdict}
             </h1>
             <p className="mt-3 text-xl font-semibold text-white">{snapshot.project.name}</p>
-            <div className="mt-7 inline-flex items-baseline gap-2 rounded-2xl border border-white/10 bg-black/20 px-6 py-3">
-              <span className="text-3xl font-semibold tabular-nums text-white">{score}</span>
-              <span className="text-sm text-slate-300">/ 100 conviction</span>
+            <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+              <CalendarDays className="size-3.5" />
+              {formatProjectDate(snapshot.project.createdAt)}
+            </p>
+            <div className="mt-7 flex justify-center">
+              <CircularProgress
+                value={score}
+                tone={invest ? "positive" : "negative"}
+                label="Conviction"
+              />
             </div>
             {memo?.frontmatter.proposedTerms ? (
               <p className="mx-auto mt-5 max-w-2xl text-sm leading-6 text-slate-300">

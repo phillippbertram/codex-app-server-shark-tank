@@ -13,6 +13,8 @@ The application uses the [Codex App Server](https://learn.chatgpt.com/docs/app-s
 - item, command, and file-change events in a compact Developer Inspector;
 - real command and file-change approvals when Codex requests them;
 - structured output for the three committee questions and their editable demo answers;
+- dated pitch projects with recoverable removal through the macOS Trash;
+- an accessible circular conviction score in the final verdict;
 - interruption, persisted state, retry, and resume after an app restart;
 - project-scoped workspace write access with agent network access disabled;
 - filesystem artifacts as human-readable shared state.
@@ -95,6 +97,8 @@ investment-memo.md
 
 `workflow-state.json` is written atomically. Event logs are redacted before persistence and renderer delivery. The Renderer cannot access Node.js or arbitrary filesystem paths; every operation crosses a narrow, validated preload bridge.
 
+The project creation date is shown consistently in the sidebar, workflow header, and final verdict. A pitch can be moved to the macOS Trash from the sidebar after its running workflow has been stopped; the complete project folder and decision history move together.
+
 ## App Server protocol
 
 The checked-in files under `src/main/codex/generated/` come from the installed CLI:
@@ -116,7 +120,7 @@ pnpm build
 git diff --check
 ```
 
-For the full acceptance path, verify both pitch presets and complete a LedgerLift run using the generated founder-answer drafts. Confirm that both parallel phases overlap in the Inspector, restart at the first human gate, verify that skipping it still produces the founder-answer artifact, and exercise Stop followed by Resume during a running node.
+For the full acceptance path, verify both pitch presets and complete a LedgerLift run using the generated founder-answer drafts. Confirm that both parallel phases overlap in the Inspector, restart at the first human gate, verify that skipping it still produces the founder-answer artifact, and exercise Stop followed by Resume during a running node. Confirm that pitch dates stay unchanged throughout the run, that a running project cannot be removed, and that a stopped or completed project moves to the macOS Trash. Check the circular conviction indicator at the final verdict.
 
 ## Scope
 

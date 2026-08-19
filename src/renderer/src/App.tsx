@@ -1,20 +1,24 @@
+import type { ProjectSummary } from "@shared/types";
 import {
   AlertTriangle,
+  CalendarDays,
   CirclePlus,
   FishSymbol,
   LoaderCircle,
   RotateCcw,
   Settings2,
+  Trash2,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ApprovalModal } from "./components/ApprovalModal";
 import { CreatePitch } from "./components/CreatePitch";
+import { DeleteProjectDialog } from "./components/DeleteProjectDialog";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { Badge, Button } from "./components/ui";
 import { Verdict } from "./components/Verdict";
 import { WorkflowDashboard } from "./components/WorkflowDashboard";
-import { cn } from "./lib";
+import { cn, formatProjectDate } from "./lib";
 import { useAppStore } from "./store/useAppStore";
 
 export function App() {
@@ -31,6 +35,7 @@ export function App() {
     clearError,
   } = useAppStore();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<ProjectSummary>();
 
   useEffect(() => {
     void initialize();
@@ -72,30 +77,43 @@ export function App() {
           </p>
           <div className="mt-2 space-y-1">
             {projects.map((project) => (
-              <button
-                type="button"
-                key={project.id}
-                onClick={() => void selectProject(project.id)}
-                className={cn(
-                  "w-full rounded-xl border border-transparent px-3 py-3 text-left transition hover:border-white/[0.08] hover:bg-white/[0.06]",
-                  active?.project.id === project.id && "border-white/[0.11] bg-white/[0.08]",
-                )}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="truncate text-xs font-semibold text-slate-200">
-                    {project.name}
-                  </span>
-                  <span
-                    className={cn(
-                      "size-1.5 shrink-0 rounded-full",
-                      projectStatusColor(project.runStatus),
-                    )}
-                  />
-                </div>
-                <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-400">
-                  {project.targetMarket}
-                </p>
-              </button>
+              <div className="group relative" key={project.id}>
+                <button
+                  type="button"
+                  onClick={() => void selectProject(project.id)}
+                  className={cn(
+                    "w-full rounded-xl border border-transparent py-3 pl-3 pr-10 text-left transition hover:border-white/[0.08] hover:bg-white/[0.06]",
+                    active?.project.id === project.id && "border-white/[0.11] bg-white/[0.08]",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs font-semibold text-slate-200">
+                      {project.name}
+                    </span>
+                    <span
+                      className={cn(
+                        "size-1.5 shrink-0 rounded-full",
+                        projectStatusColor(project.runStatus),
+                      )}
+                    />
+                  </div>
+                  <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-400">
+                    {project.targetMarket}
+                  </p>
+                  <p className="mt-2 flex items-center gap-1.5 text-[9px] font-medium text-slate-400">
+                    <CalendarDays className="size-3" /> {formatProjectDate(project.createdAt)}
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Delete ${project.name}`}
+                  title={`Delete ${project.name}`}
+                  className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-lg text-slate-500 opacity-0 transition hover:bg-red-400/10 hover:text-red-300 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 group-hover:opacity-100 group-focus-within:opacity-100"
+                  onClick={() => setProjectToDelete(project)}
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
             ))}
           </div>
         </nav>
@@ -167,6 +185,10 @@ export function App() {
           </button>
         </div>
       ) : null}
+      <DeleteProjectDialog
+        project={projectToDelete}
+        onClose={() => setProjectToDelete(undefined)}
+      />
       <ApprovalModal />
       <SettingsDialog
         open={settingsOpen}

@@ -2,6 +2,7 @@ export const IPC = {
   bootstrap: "app.bootstrap",
   projectList: "project.list",
   projectCreate: "project.create",
+  projectDelete: "project.delete",
   workflowStart: "workflow.start",
   workflowStop: "workflow.stop",
   workflowResume: "workflow.resume",

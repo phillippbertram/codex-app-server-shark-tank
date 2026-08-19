@@ -23,6 +23,7 @@ type AppState = {
   initialize: () => Promise<void>;
   selectProject: (projectId: string) => Promise<void>;
   createAndStart: (input: CreateProjectInput) => Promise<void>;
+  deleteProject: (projectId: string) => Promise<boolean>;
   showNewPitch: () => void;
   stop: () => Promise<void>;
   resume: () => Promise<void>;
@@ -85,6 +86,44 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ active, projects, busy: false });
     } catch (error) {
       set({ busy: false, error: errorMessage(error) });
+    }
+  },
+
+  deleteProject: async (projectId) => {
+    set({ busy: true, error: undefined });
+    const deletingActive = get().active?.project.id === projectId;
+    let deleted = false;
+    try {
+      const projects = await window.sharkTank.deleteProject(projectId);
+      deleted = true;
+      if (!deletingActive) {
+        set({ projects, busy: false });
+        return true;
+      }
+
+      const nextProject = projects[0];
+      if (!nextProject) {
+        set({ active: undefined, projects, busy: false });
+        return true;
+      }
+
+      const bootstrap = await window.sharkTank.bootstrap(nextProject.id);
+      set({
+        active: bootstrap.activeProject,
+        projects: bootstrap.projects,
+        codex: bootstrap.codex,
+        workflow: bootstrap.workflow,
+        approvals: bootstrap.pendingApprovals,
+        busy: false,
+      });
+      return true;
+    } catch (error) {
+      set({
+        ...(deleted && deletingActive ? { active: undefined } : {}),
+        busy: false,
+        error: errorMessage(error),
+      });
+      return false;
     }
   },
 
