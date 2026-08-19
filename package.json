@@ -2,7 +2,8 @@
   "name": "startup-shark-tank",
   "version": "0.1.0",
   "private": true,
-  "description": "A portfolio demo of a visible multi-agent investment workflow powered by the Codex App Server.",
+  "description": "A visible multi-agent investment workflow powered by the Codex App Server.",
+  "license": "MIT",
   "main": "out/main/index.js",
   "packageManager": "pnpm@11.15.1",
   "engines": {

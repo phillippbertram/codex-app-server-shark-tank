@@ -1,69 +1,195 @@
-# Startup Shark Tank
+<h1 align="center">Startup Shark Tank</h1>
 
-Startup Shark Tank is a local macOS portfolio demo that makes a multi-agent Codex workflow visible. A founder submits a pitch, independent investment specialists create a file-based decision record, the founder answers two deliberate human gates, and an investment committee produces a final memo.
+<p align="center">
+  <strong>A visible multi-agent investment workflow powered by the Codex App Server.</strong>
+</p>
 
-The application uses the [Codex App Server](https://learn.chatgpt.com/docs/app-server) directly over JSONL/JSON-RPC. It does not use the Codex SDK, an orchestration framework, a database, or a cloud service.
+<p align="center">
+  <img alt="Electron 43" src="https://img.shields.io/badge/Electron-43-47848F?logo=electron&logoColor=white">
+  <img alt="React 19" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=0B1020">
+  <img alt="TypeScript 5.9" src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white">
+  <img alt="Codex App Server" src="https://img.shields.io/badge/Codex-App_Server-10A37F">
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/License-MIT-f5c518"></a>
+</p>
 
-## What the demo shows
+Turn a startup pitch into an inspectable **INVEST** or **PASS** decision. Independent Codex agents analyze the opportunity, challenge each other through shared files, pause for founder input, and produce one auditable investment memo.
 
-- one long-lived `codex app-server --stdio` process owned by Electron Main;
-- mandatory `initialize` / `initialized` negotiation and existing Codex account status;
-- ephemeral threads and streamed turns for every specialist;
-- two genuinely parallel workflow phases through the same App Server process;
-- item, command, and file-change events in a compact Developer Inspector;
-- real command and file-change approvals when Codex requests them;
-- structured output for the three committee questions and their editable demo answers;
-- dated pitch projects with recoverable removal through the macOS Trash;
-- an accessible circular conviction score in the final verdict;
-- a sticky workflow roadmap with parallel stages, live node durations, and status-aware cards;
-- final conviction scores surfaced discreetly in the pitch project list;
-- interruption, persisted state, retry, and resume after an app restart;
-- project-scoped workspace write access with agent network access disabled;
-- filesystem artifacts as human-readable shared state.
+![LedgerLift workflow paused for founder questions](docs/images/workflow-q-and-a.png)
 
-Web search and Codex's internal subagent feature are disabled for the App Server process. The visible workflow is entirely orchestrated by this application.
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/images/new-pitch.png" alt="LedgerLift example selected in the editable New Pitch form">
+      <br><sub><strong>Start with an editable example pitch</strong></sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/images/final-verdict.png" alt="LedgerLift PASS verdict with a circular conviction score and investment memo">
+      <br><sub><strong>Finish with a complete decision record</strong></sub>
+    </td>
+  </tr>
+</table>
 
-## Run locally
+## Quick start
 
-Requirements:
-
-- macOS
-- Node.js `>=24 <25`
-- pnpm `11.15.1`
-- the `codex` CLI on `PATH`
-- an existing Codex login (`codex login`)
+**Requires:** macOS, Node.js `>=24 <25`, pnpm `11.15.1`, and the [`codex`](https://learn.chatgpt.com/docs) CLI on `PATH`.
 
 ```bash
 pnpm install
+codex login # skip when already signed in
 pnpm dev
 ```
 
-The first screen contains two ready-to-run, fully editable pitches: Doggo, a consumer marketplace, and LedgerLift, a B2B cash-flow product. Submit either example, watch the specialists build their artifacts, use or edit the generated founder-answer drafts, skip a human gate when desired, and inspect the final verdict.
+Choose **Doggo** or **LedgerLift**, edit the pitch if desired, and start the investment review.
 
-## Decision flow
+## Product journey
 
-```text
-Market Scout
-    ├── Business Model Analyst ──┐
-    └── Product Strategist ──────┴── Risk & Diligence
-                                        │
-                                Committee Questions
-                                        │
-                            Founder Answers or Skip
-                                        │
-                              ┌─────────┴─────────┐
-                           Bullish VC          Bearish VC
-                              └─────────┬─────────┘
-                                  Founder Rebuttal
-                                        │
-                               Investment Committee
+```mermaid
+flowchart LR
+    pitch["1 · Founder pitch"] --> analysis["2 · Independent analysis"]
+    analysis --> questions{{"3 · Founder Q&A"}}
+    questions --> debate["4 · Bull vs. bear"]
+    debate --> rebuttal{{"5 · Founder rebuttal"}}
+    rebuttal --> verdict["6 · INVEST or PASS"]
+
+    classDef agent fill:#102033,stroke:#38bdf8,color:#e2e8f0
+    classDef human fill:#2b2512,stroke:#fbbf24,color:#fef3c7
+    classDef outcome fill:#0d2b22,stroke:#34d399,color:#d1fae5
+    class pitch,analysis,debate agent
+    class questions,rebuttal human
+    class verdict outcome
 ```
 
-The generic engine only knows `agent` and `human-input` nodes. The Shark Tank itself is described by [`workflows/shark-tank.yaml`](workflows/shark-tank.yaml), with specialist behavior in [`agents/shark-tank`](agents/shark-tank).
+The app is a workflow dashboard, not a group chat. Every specialist gets a fresh Codex thread; Markdown and JSON artifacts carry evidence between stages.
 
-## Workflow and model configuration
+## Workflow
 
-The workflow defines a default model and concurrency limit:
+Ten nodes form eight connected stages. The two analyst pairs run in parallel, while the human gates can be answered or skipped.
+
+```mermaid
+flowchart LR
+    market["Market Scout"]
+    business["Business Model<br/>Analyst"]
+    product["Product<br/>Strategist"]
+    risk["Risk & Diligence<br/>Lead"]
+    committee["Committee<br/>Questions"]
+    answers{{"Founder Q&A<br/>optional skip"}}
+    bullish["Bullish VC"]
+    bearish["Bearish VC"]
+    rebuttal{{"Founder Rebuttal<br/>optional skip"}}
+    verdict["Investment<br/>Committee"]
+
+    market --> business
+    market --> product
+    business --> risk
+    product --> risk
+    risk --> committee --> answers
+    answers --> bullish
+    answers --> bearish
+    bullish --> rebuttal
+    bearish --> rebuttal
+    rebuttal --> verdict
+
+    classDef agent fill:#102033,stroke:#38bdf8,color:#e2e8f0
+    classDef human fill:#2b2512,stroke:#fbbf24,color:#fef3c7
+    classDef outcome fill:#0d2b22,stroke:#34d399,color:#d1fae5
+    class market,business,product,risk,committee,bullish,bearish agent
+    class answers,rebuttal human
+    class verdict outcome
+```
+
+The generic engine only knows `agent` and `human-input` nodes. The graph lives in [`workflows/shark-tank.yaml`](workflows/shark-tank.yaml); specialist instructions live in [`agents/shark-tank`](agents/shark-tank).
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph desktop[Electron desktop app]
+        renderer["React renderer"]
+        preload["Narrow preload bridge"]
+        main["Electron Main"]
+        engine["Workflow engine"]
+        store["Project store"]
+        adapter["App Server adapter"]
+
+        renderer <-->|"validated IPC + AppEvents"| preload
+        preload <--> main
+        main --> engine
+        engine <--> store
+        engine <--> adapter
+    end
+
+    server["codex app-server --stdio"]
+    codex["Codex"]
+    files[("projects/&lt;slug&gt;<br/>Markdown · JSON · JSONL")]
+
+    adapter <-->|"JSON-RPC 2.0 over JSONL"| server
+    server <--> codex
+    store <--> files
+    server -->|"project-scoped writes"| files
+
+    classDef app fill:#102033,stroke:#38bdf8,color:#e2e8f0
+    classDef protocol fill:#1e1633,stroke:#a78bfa,color:#ede9fe
+    classDef data fill:#0d2b22,stroke:#34d399,color:#d1fae5
+    class renderer,preload,main,engine,store,adapter app
+    class server,codex protocol
+    class files data
+```
+
+The Renderer has no Node.js or arbitrary filesystem access. Electron Main owns the canonical workflow state, validates all paths, and runs one long-lived App Server process for every specialist.
+
+## Why Codex App Server?
+
+The [Codex App Server](https://learn.chatgpt.com/docs/app-server) is the interface Codex uses for rich clients. It exposes authentication, threads, turns, approvals, interrupts, and streamed agent events through bidirectional JSON-RPC; the default stdio transport is newline-delimited JSON.
+
+That makes it a better fit here than a background job abstraction: the desktop app needs to show live work, route real approvals to the founder, stop active turns, and explain every step in its Developer Inspector. For CI and unattended automation, OpenAI recommends the Codex SDK instead.
+
+<details>
+<summary><strong>Follow one agent turn</strong></summary>
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as React renderer
+    participant Engine as Workflow engine
+    participant Server as Codex App Server
+    participant Files as Project files
+
+    Engine->>Server: initialize (once per connection)
+    Server-->>Engine: capabilities
+    Engine->>Server: initialized
+    Engine->>Server: thread/start
+    Server-->>Engine: thread/started
+    Engine->>Server: turn/start
+
+    loop streamed work
+        Server-->>Engine: item/started · deltas · item/completed
+        Engine-->>UI: curated AppEvent
+    end
+
+    opt approval requested
+        Server->>Engine: command or file-change approval
+        Engine->>UI: approval modal
+        UI->>Engine: founder decision
+        Engine->>Server: approval response
+    end
+
+    Server->>Files: create Markdown or JSON artifacts
+    Server-->>Engine: turn/completed
+    Engine->>Files: validate outputs and persist state
+```
+
+The checked-in TypeScript bindings under `src/main/codex/generated/` are generated by the installed CLI and match its protocol version:
+
+```bash
+pnpm codex:generate
+```
+
+</details>
+
+<details>
+<summary><strong>Workflow and model configuration</strong></summary>
+
+The workflow sets a default model and concurrency limit:
 
 ```yaml
 defaults:
@@ -71,7 +197,7 @@ defaults:
   maxParallelAgents: 2
 ```
 
-An agent can override the workflow model through frontmatter in its Markdown definition:
+An agent can override the model in its Markdown frontmatter:
 
 ```yaml
 ---
@@ -79,41 +205,39 @@ model: gpt-5.6-sol
 ---
 ```
 
-Omit the frontmatter to inherit the workflow default. The application exposes the workflow, effective model selection, available local Codex models, dependencies, outputs, and complete agent instructions in the read-only Configuration dialog.
+The read-only **Configuration** dialog shows the workflow, dependencies, effective model for every agent, available Codex models, expected outputs, and complete agent instructions.
 
-## Project output
+</details>
 
-Each pitch is stored under `projects/<slug>/`:
+<details>
+<summary><strong>Files, persistence, and recovery</strong></summary>
 
 ```text
-project.json
-pitch.md
-artifacts/*.md
-committee/questions.json
-committee/questions.md
-human/*.md
-investment-memo.md
-.sharktank/workflow-state.json
-.sharktank/runs/<runId>/events.jsonl
+projects/<slug>/
+├── project.json
+├── pitch.md
+├── artifacts/*.md
+├── committee/questions.json
+├── committee/questions.md
+├── human/*.md
+├── investment-memo.md
+└── .sharktank/
+    ├── workflow-state.json
+    └── runs/<runId>/events.jsonl
 ```
 
-`workflow-state.json` is written atomically. Event logs are redacted before persistence and renderer delivery. The Renderer cannot access Node.js or arbitrary filesystem paths; every operation crosses a narrow, validated preload bridge.
+- State changes are atomic; persisted events are redacted.
+- Completed nodes and human input survive an app restart. Previously running nodes become resumable interruptions.
+- Agent tools can write only inside the pitch project and cannot access the network.
+- Web search and Codex internal subagents are disabled so the visible orchestration belongs entirely to this app.
+- Stopped, waiting, failed, and completed pitches can be moved to the macOS Trash. Active runs must be stopped first.
 
-The project creation date is shown consistently in the sidebar, workflow header, and final verdict. A pitch can be moved to the macOS Trash from the sidebar after its running workflow has been stopped; the complete project folder and decision history move together.
+</details>
 
-## App Server protocol
+<details>
+<summary><strong>Manual verification and intentional limits</strong></summary>
 
-The checked-in files under `src/main/codex/generated/` come from the installed CLI:
-
-```bash
-pnpm codex:generate
-```
-
-Those generated bindings are the source of truth for method parameters and enum values. Handwritten protocol names are isolated in the small App Server adapter.
-
-## Manual verification
-
-This portfolio MVP intentionally contains no automated tests, test framework, mocks, fixtures, or test configuration. The local quality gate is:
+This demo intentionally contains no automated test framework, mocks, fixtures, or test configuration. Its local quality gate is:
 
 ```bash
 pnpm lint
@@ -122,8 +246,20 @@ pnpm build
 git diff --check
 ```
 
-For the full acceptance path, verify both pitch presets and complete a LedgerLift run using the generated founder-answer drafts. Confirm that the sticky roadmap shows both parallel phases, keeps the active node visible at narrow widths, and agrees with the detailed cards and their live durations. Restart at the first human gate, verify that skipping it still produces the founder-answer artifact, and exercise Stop followed by Resume during a running node. Confirm that pitch dates stay unchanged throughout the run, that a running project cannot be removed, and that a stopped or completed project moves to the macOS Trash. Check the circular conviction indicator and the matching sidebar score at the final verdict.
+For a full walkthrough, complete a LedgerLift run, use or edit a generated founder-answer draft, exercise Stop and Resume, inspect both parallel phases, and confirm the final memo and score in the sidebar.
 
-## Scope
+This is a local macOS development demo, not a signed distribution. It intentionally has no database, cloud queue, custom login flow, generic form builder, protocol playground, or synthetic approval probe.
 
-This is a development demo, not a signed or distributable Electron product. It intentionally has no database, authentication UI, cloud queue, generic form builder, protocol playground, synthetic approval probe, or automated test suite.
+</details>
+
+## Support
+
+Enjoying Startup Shark Tank or finding it useful? If you would like to support future experiments around Codex and agent workflows, a coffee is always appreciated. Thank you! ☕
+
+<a href="https://buymeacoffee.com/phillippbertram">   <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="45"> </a>
+
+## License
+
+Released under the [MIT License](LICENSE).
+
+Official references: [Codex documentation](https://learn.chatgpt.com/docs) · [Codex App Server](https://learn.chatgpt.com/docs/app-server)
