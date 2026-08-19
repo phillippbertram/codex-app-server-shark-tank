@@ -1,6 +1,7 @@
 import type { CodexModelSummary, WorkflowDefinition, WorkflowNodeDefinition } from "@shared/types";
 import { Bot, BrainCircuit, FileCode2, GitBranch, LockKeyhole, UsersRound } from "lucide-react";
 import { Badge, Card, Dialog } from "./ui";
+import { WorkflowRoadmap } from "./WorkflowDashboard";
 
 export function SettingsDialog({
   open,
@@ -96,6 +97,29 @@ export function SettingsDialog({
                     </p>
                   )}
                 </div>
+              </Card>
+            </section>
+
+            <section>
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
+                    Workflow structure
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold text-white">
+                    How the agents work together
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-400">
+                    Steps run from left to right. Stacked steps can run in parallel once their
+                    dependencies are complete.
+                  </p>
+                </div>
+                <span className="hidden text-xs text-slate-400 sm:block">
+                  {workflow.nodes.length} steps
+                </span>
+              </div>
+              <Card className="p-5">
+                <WorkflowRoadmap nodes={workflow.nodes} ariaLabel="Configured workflow structure" />
               </Card>
             </section>
 

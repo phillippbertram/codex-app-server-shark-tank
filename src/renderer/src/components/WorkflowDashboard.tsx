@@ -203,14 +203,16 @@ export function WorkflowDashboard({ snapshot }: { snapshot: ProjectSnapshot }) {
   );
 }
 
-function WorkflowRoadmap({
+export function WorkflowRoadmap({
   nodes,
   state,
   onSelect,
+  ariaLabel = "Workflow progress",
 }: {
   nodes: WorkflowNodeDefinition[];
   state?: WorkflowState;
-  onSelect: (nodeId: string) => void;
+  onSelect?: (nodeId: string) => void;
+  ariaLabel?: string;
 }) {
   const scroller = useRef<HTMLElement>(null);
   const activeNodeId = currentNodeId(state);
@@ -223,7 +225,7 @@ function WorkflowRoadmap({
   }, [activeNodeId]);
 
   return (
-    <nav ref={scroller} className="overflow-x-auto pb-1" aria-label="Workflow progress">
+    <nav ref={scroller} className="overflow-x-auto pb-1" aria-label={ariaLabel}>
       <div className="flex min-w-max items-stretch px-1">
         {stages.map((stage, stageIndex) => {
           const stageNodes = stage.flatMap((nodeId) => {
@@ -238,23 +240,18 @@ function WorkflowRoadmap({
                   const status = state?.nodes[node.id]?.status ?? "pending";
                   const StatusIcon = statusIcon(status);
                   const current = node.id === activeNodeId;
-                  return (
-                    <button
-                      key={node.id}
-                      type="button"
-                      data-node-id={node.id}
-                      aria-current={current ? "step" : undefined}
-                      aria-label={`${node.label}: ${statusLabel(status)}`}
-                      className={cn(
-                        "flex min-h-9 w-full items-center gap-2 rounded-xl border px-2 py-1.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50",
-                        roadmapNode(status),
-                        current &&
-                          status !== "running" &&
-                          status !== "waiting_for_human" &&
-                          "ring-1 ring-white/25",
-                      )}
-                      onClick={() => onSelect(node.id)}
-                    >
+                  const className = cn(
+                    "flex min-h-9 w-full items-center gap-2 rounded-xl border px-2 py-1.5 text-left",
+                    onSelect &&
+                      "transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50",
+                    roadmapNode(status, Boolean(onSelect)),
+                    current &&
+                      status !== "running" &&
+                      status !== "waiting_for_human" &&
+                      "ring-1 ring-white/25",
+                  );
+                  const content = (
+                    <>
                       <span
                         className={cn(
                           "flex size-5 shrink-0 items-center justify-center rounded-md",
@@ -268,7 +265,25 @@ function WorkflowRoadmap({
                       <span className="line-clamp-2 text-[9px] font-semibold leading-3.5">
                         {node.label}
                       </span>
+                    </>
+                  );
+
+                  return onSelect ? (
+                    <button
+                      key={node.id}
+                      type="button"
+                      data-node-id={node.id}
+                      aria-current={current ? "step" : undefined}
+                      aria-label={`${node.label}: ${statusLabel(status)}`}
+                      className={className}
+                      onClick={() => onSelect(node.id)}
+                    >
+                      {content}
                     </button>
+                  ) : (
+                    <div key={node.id} data-node-id={node.id} className={className}>
+                      {content}
+                    </div>
                   );
                 })}
               </div>
@@ -438,9 +453,12 @@ function connectorColor(stage: string[], nextStage: string[], state?: WorkflowSt
   return "bg-white/[0.13]";
 }
 
-function roadmapNode(status: NodeStatus): string {
+function roadmapNode(status: NodeStatus, interactive: boolean): string {
   if (status === "completed") {
-    return "border-emerald-400/25 bg-emerald-400/[0.07] text-emerald-100 hover:bg-emerald-400/[0.11]";
+    return cn(
+      "border-emerald-400/25 bg-emerald-400/[0.07] text-emerald-100",
+      interactive && "hover:bg-emerald-400/[0.11]",
+    );
   }
   if (status === "running") {
     return "border-sky-400/35 bg-sky-400/[0.1] text-sky-100 ring-1 ring-sky-400/15";
@@ -454,7 +472,10 @@ function roadmapNode(status: NodeStatus): string {
   if (status === "interrupted" || status === "cancelled") {
     return "border-white/[0.12] bg-white/[0.04] text-slate-400";
   }
-  return "border-white/[0.1] bg-white/[0.025] text-slate-400 hover:bg-white/[0.06]";
+  return cn(
+    "border-white/[0.1] bg-white/[0.025] text-slate-400",
+    interactive && "hover:bg-white/[0.06]",
+  );
 }
 
 function statusCard(status: NodeStatus): string {
