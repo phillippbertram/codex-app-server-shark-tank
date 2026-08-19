@@ -57,21 +57,21 @@ export function WorkflowDashboard({ snapshot }: { snapshot: ProjectSnapshot }) {
   return (
     <div className="flex min-w-0 flex-1 overflow-hidden">
       <main className="min-w-0 flex-1 overflow-y-auto">
-        <header className="sticky top-0 z-20 border-b border-white/[0.07] bg-[#080d16]/90 px-8 py-5 backdrop-blur-xl">
+        <header className="sticky top-0 z-20 border-b border-white/[0.11] bg-[#080d16]/94 px-8 py-5 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-5">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <Badge className={statusBadge(state?.status)}>
                   {state?.status.replaceAll("_", " ")}
                 </Badge>
-                <span className="text-xs text-slate-600">
+                <span className="text-xs text-slate-400">
                   {completedCount}/{snapshot.workflow.nodes.length} decisions complete
                 </span>
               </div>
               <h1 className="mt-2 truncate text-2xl font-semibold tracking-tight text-white">
                 {snapshot.project.name}
               </h1>
-              <p className="mt-1 truncate text-sm text-slate-500">
+              <p className="mt-1 truncate text-sm text-slate-400">
                 {snapshot.project.pitchSummary}
               </p>
             </div>
@@ -114,11 +114,11 @@ export function WorkflowDashboard({ snapshot }: { snapshot: ProjectSnapshot }) {
                   <h2 className="mt-2 text-xl font-semibold text-white">
                     How the decision is built
                   </h2>
-                  <p className="mt-2 text-sm text-slate-500">
+                  <p className="mt-2 text-sm text-slate-400">
                     Every specialist gets a fresh Codex thread and shares conclusions through files.
                   </p>
                 </div>
-                <div className="hidden items-center gap-4 text-[11px] text-slate-500 md:flex">
+                <div className="hidden items-center gap-4 text-[11px] text-slate-400 md:flex">
                   <Legend color="bg-emerald-400" label="Complete" />
                   <Legend color="bg-sky-400" label="Running" />
                   <Legend color="bg-slate-600" label="Queued" />
@@ -129,10 +129,10 @@ export function WorkflowDashboard({ snapshot }: { snapshot: ProjectSnapshot }) {
                 {stages.map((stage, stageIndex) => (
                   <div className="workflow-stage" key={stage.join("-")}>
                     <div className="mb-3 flex items-center gap-2 px-1">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-600">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
                         {String(stageIndex + 1).padStart(2, "0")}
                       </span>
-                      <div className="h-px flex-1 bg-white/[0.055]" />
+                      <div className="h-px flex-1 bg-white/[0.1]" />
                     </div>
                     <div className={cn("grid gap-3", stage.length === 2 && "xl:grid-cols-2")}>
                       {stage.map((nodeId) => {
@@ -208,7 +208,7 @@ function NodeCard({
   return (
     <Card
       className={cn(
-        "group relative overflow-hidden p-5 transition hover:border-white/[0.13]",
+        "group relative overflow-hidden p-5 transition hover:border-white/[0.2]",
         selected && "border-emerald-400/25 ring-1 ring-emerald-400/15",
         status === "running" && "border-sky-400/20 bg-sky-400/[0.025]",
         status === "failed" && "border-red-400/20 bg-red-400/[0.025]",
@@ -231,34 +231,34 @@ function NodeCard({
             </div>
             <div className="min-w-0">
               <h3 className="truncate text-sm font-semibold text-slate-100">{node.label}</h3>
-              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-600">
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
                 {node.type === "agent" ? "Codex agent" : "Human gate"}
               </p>
             </div>
           </div>
-          <span className="text-[10px] tabular-nums text-slate-600">
+          <span className="text-[10px] tabular-nums text-slate-400">
             {state?.status === "running" ? "live" : formatDuration(state?.durationMs)}
           </span>
         </div>
-        <p className="mt-4 min-h-10 text-xs leading-5 text-slate-500">
+        <p className="mt-4 min-h-10 text-xs leading-5 text-slate-400">
           {state?.error ?? state?.activity ?? statusDescription(status, node.type)}
         </p>
       </button>
 
-      <div className="mt-4 flex min-h-8 flex-wrap items-center gap-2 border-t border-white/[0.055] pt-3">
+      <div className="mt-4 flex min-h-8 flex-wrap items-center gap-2 border-t border-white/[0.1] pt-3">
         {outputArtifacts.length ? (
           outputArtifacts.map((artifact) => (
             <button
               type="button"
               key={artifact.path}
-              className="flex items-center gap-1.5 rounded-lg bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-semibold text-slate-400 hover:bg-white/[0.08] hover:text-slate-200"
+              className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.065] px-2.5 py-1.5 text-[10px] font-semibold text-slate-300 hover:border-white/[0.14] hover:bg-white/[0.11] hover:text-white"
               onClick={() => onArtifact(artifact)}
             >
               <FileText className="size-3" /> {artifact.label}
             </button>
           ))
         ) : (
-          <span className="text-[10px] text-slate-700">
+          <span className="text-[10px] text-slate-400">
             {node.outputs.length} expected output{node.outputs.length === 1 ? "" : "s"}
           </span>
         )}
@@ -287,7 +287,7 @@ function statusIconBox(status: NodeStatus): string {
   if (status === "running") return "bg-sky-400/10 text-sky-300";
   if (status === "waiting_for_human") return "bg-amber-300/10 text-amber-200";
   if (status === "failed") return "bg-red-400/10 text-red-300";
-  return "bg-white/[0.05] text-slate-500";
+  return "bg-white/[0.08] text-slate-400";
 }
 
 function statusDescription(status: NodeStatus, type: WorkflowNodeDefinition["type"]): string {

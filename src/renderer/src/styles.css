@@ -37,9 +37,9 @@ button {
 input,
 textarea {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.06);
   padding: 0.75rem 0.875rem;
   color: #f1f5f9;
   font-size: 0.875rem;
@@ -53,21 +53,21 @@ textarea {
 
 input:focus,
 textarea:focus {
-  border-color: rgba(52, 211, 153, 0.4);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.075);
+  border-color: rgba(52, 211, 153, 0.58);
+  background: rgba(255, 255, 255, 0.085);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.12);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #475569;
+  color: #94a3b8;
 }
 
 .field-label,
 .eyebrow {
   display: block;
   margin-bottom: 0.5rem;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.17em;
@@ -88,12 +88,12 @@ textarea::placeholder {
   width: 1px;
   height: 12px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.14);
   content: "";
 }
 
 .prose-shark {
-  color: #94a3b8;
+  color: #b8c4d4;
   font-size: 0.9rem;
   line-height: 1.8;
 }
@@ -139,7 +139,7 @@ textarea::placeholder {
 }
 
 .prose-shark strong {
-  color: #cbd5e1;
+  color: #e2e8f0;
 }
 
 .prose-shark code {
@@ -168,11 +168,11 @@ textarea::placeholder {
 ::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.17);
+  background: rgba(148, 163, 184, 0.28);
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.28);
+  background: rgba(148, 163, 184, 0.42);
   background-clip: padding-box;
 }

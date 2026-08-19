@@ -46,7 +46,7 @@ function QuestionGate({
           <h2 className="mt-2 text-2xl font-semibold text-white">
             Three questions could change the decision
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-400">
+          <p className="mt-2 text-sm leading-6 text-slate-300">
             Your answers become a shared artifact for both VC perspectives.
           </p>
         </div>
@@ -62,7 +62,7 @@ function QuestionGate({
                 <span className="block text-sm font-semibold leading-6 text-slate-100">
                   {question.question}
                 </span>
-                <span className="mt-1 block text-xs leading-5 text-slate-500">
+                <span className="mt-1 block text-xs leading-5 text-slate-400">
                   {question.reason}
                 </span>
               </div>
@@ -121,7 +121,7 @@ function RebuttalGate({
         <h2 className="mt-4 text-2xl font-semibold text-white">
           The VCs disagree. Your last word?
         </h2>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-slate-300">
           Address the strongest claim below, or let the committee decide on the existing record.
         </p>
       </div>
@@ -185,7 +185,7 @@ function CaseCard({
           {artifact ? String(artifact.frontmatter.score ?? "—") : "—"}
         </span>
       </div>
-      <p className="mt-4 line-clamp-6 whitespace-pre-line text-xs leading-6 text-slate-400">
+      <p className="mt-4 line-clamp-6 whitespace-pre-line text-xs leading-6 text-slate-300">
         {artifact?.content.replace(/^#.*\n/, "").slice(0, 700) ?? "Loading the argument…"}
       </p>
     </Card>

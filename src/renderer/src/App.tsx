@@ -36,14 +36,14 @@ export function App() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#080d16] text-slate-200">
-      <aside className="flex w-64 shrink-0 flex-col border-r border-white/[0.07] bg-[#070b12] pt-11">
+      <aside className="flex w-64 shrink-0 flex-col border-r border-white/[0.11] bg-[#080d15] pt-11">
         <div className="flex items-center gap-3 px-5 pb-6">
           <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-400 text-slate-950 shadow-[0_0_30px_rgba(52,211,153,0.18)]">
             <FishSymbol className="size-5" />
           </div>
           <div>
             <div className="text-sm font-bold tracking-tight text-white">Startup Shark Tank</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-600">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-400">
               Codex App Server
             </div>
           </div>
@@ -56,7 +56,7 @@ export function App() {
         </div>
 
         <nav className="mt-6 flex-1 overflow-y-auto px-3">
-          <p className="px-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700">
+          <p className="px-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
             Pitch projects
           </p>
           <div className="mt-2 space-y-1">
@@ -66,12 +66,12 @@ export function App() {
                 key={project.id}
                 onClick={() => void selectProject(project.id)}
                 className={cn(
-                  "w-full rounded-xl px-3 py-3 text-left transition hover:bg-white/[0.045]",
-                  active?.project.id === project.id && "bg-white/[0.06]",
+                  "w-full rounded-xl border border-transparent px-3 py-3 text-left transition hover:border-white/[0.08] hover:bg-white/[0.06]",
+                  active?.project.id === project.id && "border-white/[0.11] bg-white/[0.08]",
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate text-xs font-semibold text-slate-300">
+                  <span className="truncate text-xs font-semibold text-slate-200">
                     {project.name}
                   </span>
                   <span
@@ -81,7 +81,7 @@ export function App() {
                     )}
                   />
                 </div>
-                <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-600">
+                <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-400">
                   {project.targetMarket}
                 </p>
               </button>
@@ -89,8 +89,8 @@ export function App() {
           </div>
         </nav>
 
-        <div className="border-t border-white/[0.07] p-4">
-          <div className="flex items-center gap-3 rounded-xl bg-white/[0.025] p-3">
+        <div className="border-t border-white/[0.11] p-4">
+          <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.045] p-3">
             <span
               className={cn(
                 "size-2 shrink-0 rounded-full",
@@ -102,10 +102,10 @@ export function App() {
               )}
             />
             <div className="min-w-0">
-              <p className="truncate text-[11px] font-semibold text-slate-300">
+              <p className="truncate text-[11px] font-semibold text-slate-200">
                 {codex.state === "ready" ? "App Server connected" : "App Server unavailable"}
               </p>
-              <p className="mt-0.5 truncate text-[9px] text-slate-600">
+              <p className="mt-0.5 truncate text-[9px] text-slate-400">
                 {codex.userAgent ?? codex.message}
               </p>
             </div>
@@ -123,7 +123,7 @@ export function App() {
               Setup needed
             </Badge>
             <h1 className="mt-4 text-3xl font-semibold text-white">Codex is not ready yet</h1>
-            <p className="mt-3 text-sm leading-7 text-slate-400">{codex.message}</p>
+            <p className="mt-3 text-sm leading-7 text-slate-300">{codex.message}</p>
             <Button className="mt-6" variant="secondary" onClick={() => void initialize()}>
               <RotateCcw className="size-4" /> Check again
             </Button>
@@ -156,5 +156,5 @@ function projectStatusColor(status: string): string {
   if (status === "running") return "bg-sky-400";
   if (status === "waiting_for_human") return "bg-amber-300";
   if (status === "failed") return "bg-red-400";
-  return "bg-slate-700";
+  return "bg-slate-500";
 }

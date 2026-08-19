@@ -21,8 +21,8 @@ export function Inspector({
   );
 
   return (
-    <aside className="flex w-[390px] shrink-0 flex-col border-l border-white/[0.07] bg-[#070c14]">
-      <header className="border-b border-white/[0.07] px-5 pb-4 pt-5">
+    <aside className="flex w-[390px] shrink-0 flex-col border-l border-white/[0.11] bg-[#090f19]">
+      <header className="border-b border-white/[0.11] px-5 pb-4 pt-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">
@@ -35,7 +35,7 @@ export function Inspector({
           </Button>
         </div>
         {state ? (
-          <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+          <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] text-slate-400">
             <Meta label="Thread" value={state.threadId?.slice(0, 12) ?? "—"} />
             <Meta label="Turn" value={state.turnId?.slice(0, 12) ?? "—"} />
             <Meta label="Attempt" value={String(state.attempt)} />
@@ -45,7 +45,7 @@ export function Inspector({
       </header>
       <div className="flex-1 overflow-y-auto p-4">
         {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 px-5 py-10 text-center text-xs leading-5 text-slate-500">
+          <div className="rounded-2xl border border-dashed border-white/15 px-5 py-10 text-center text-xs leading-5 text-slate-400">
             Select a node to inspect its App Server lifecycle.
           </div>
         ) : (
@@ -63,7 +63,7 @@ export function Inspector({
 function InspectorRow({ event }: { event: InspectorEvent }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="relative rounded-xl border border-white/[0.06] bg-[#0b121e] p-3 pl-8">
+    <div className="relative rounded-xl border border-white/[0.11] bg-[#0d1624] p-3 pl-8">
       <CircleDot className="absolute left-[9px] top-[14px] z-10 size-3.5 rounded-full bg-[#0b121e] text-emerald-400" />
       <div className="flex items-center justify-between gap-2">
         <Badge
@@ -77,7 +77,7 @@ function InspectorRow({ event }: { event: InspectorEvent }) {
         >
           {event.direction}
         </Badge>
-        <span className="text-[10px] tabular-nums text-slate-600">
+        <span className="text-[10px] tabular-nums text-slate-400">
           {new Date(event.timestamp).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -85,12 +85,12 @@ function InspectorRow({ event }: { event: InspectorEvent }) {
           })}
         </span>
       </div>
-      <code className="mt-2 block text-[11px] font-semibold text-slate-300">{event.method}</code>
-      <p className="mt-1 text-[11px] leading-5 text-slate-500">{event.summary}</p>
+      <code className="mt-2 block text-[11px] font-semibold text-slate-200">{event.method}</code>
+      <p className="mt-1 text-[11px] leading-5 text-slate-400">{event.summary}</p>
       {event.data !== undefined ? (
         <button
           type="button"
-          className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-slate-300"
+          className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-white"
           onClick={() => setOpen(!open)}
         >
           <ChevronDown className={`size-3 transition ${open ? "rotate-180" : ""}`} />
@@ -98,7 +98,7 @@ function InspectorRow({ event }: { event: InspectorEvent }) {
         </button>
       ) : null}
       {open ? (
-        <pre className="mt-2 max-h-52 overflow-auto rounded-lg bg-black/30 p-2 text-[9px] leading-4 text-slate-500">
+        <pre className="mt-2 max-h-52 overflow-auto rounded-lg border border-white/[0.07] bg-black/30 p-2 text-[9px] leading-4 text-slate-400">
           {JSON.stringify(event.data, null, 2)}
         </pre>
       ) : null}
@@ -108,9 +108,9 @@ function InspectorRow({ event }: { event: InspectorEvent }) {
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-white/[0.035] px-2.5 py-2">
+    <div className="rounded-lg border border-white/[0.07] bg-white/[0.055] px-2.5 py-2">
       <span>{label}</span>
-      <code className="mt-0.5 block truncate text-slate-300">{value}</code>
+      <code className="mt-0.5 block truncate text-slate-200">{value}</code>
     </div>
   );
 }

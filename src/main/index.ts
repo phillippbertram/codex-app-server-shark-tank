@@ -35,7 +35,14 @@ async function createApplication(): Promise<void> {
       sandbox: true,
     },
   });
-  workflow.on("appEvent", (event) => mainWindow?.webContents.send(IPC.appEvent, event));
+  workflow.on("appEvent", (event) => {
+    const window = mainWindow;
+    if (!window || window.isDestroyed() || window.webContents.isDestroyed()) return;
+    window.webContents.send(IPC.appEvent, event);
+  });
+  mainWindow.on("closed", () => {
+    mainWindow = undefined;
+  });
   mainWindow.on("ready-to-show", () => mainWindow?.show());
 
   if (process.env.ELECTRON_RENDERER_URL) {

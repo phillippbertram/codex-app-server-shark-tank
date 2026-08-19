@@ -42,10 +42,10 @@ export function Verdict({ snapshot }: { snapshot: ProjectSnapshot }) {
             <p className="mt-3 text-xl font-semibold text-white">{snapshot.project.name}</p>
             <div className="mt-7 inline-flex items-baseline gap-2 rounded-2xl border border-white/10 bg-black/20 px-6 py-3">
               <span className="text-3xl font-semibold tabular-nums text-white">{score}</span>
-              <span className="text-sm text-slate-500">/ 100 conviction</span>
+              <span className="text-sm text-slate-300">/ 100 conviction</span>
             </div>
             {memo?.frontmatter.proposedTerms ? (
-              <p className="mx-auto mt-5 max-w-2xl text-sm leading-6 text-slate-400">
+              <p className="mx-auto mt-5 max-w-2xl text-sm leading-6 text-slate-300">
                 <span className="font-semibold text-slate-200">Proposed terms:</span>{" "}
                 {String(memo.frontmatter.proposedTerms)}
               </p>
@@ -72,7 +72,7 @@ export function Verdict({ snapshot }: { snapshot: ProjectSnapshot }) {
               </div>
               <div>
                 <h2 className="font-semibold text-white">Investment memo</h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Synthesized from the complete decision record
                 </p>
               </div>
@@ -82,7 +82,7 @@ export function Verdict({ snapshot }: { snapshot: ProjectSnapshot }) {
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{memo.content}</ReactMarkdown>
               </article>
             ) : (
-              <p className="text-sm text-slate-500">Loading final memo…</p>
+              <p className="text-sm text-slate-400">Loading final memo…</p>
             )}
           </Card>
 
@@ -100,15 +100,15 @@ export function Verdict({ snapshot }: { snapshot: ProjectSnapshot }) {
                   <button
                     type="button"
                     key={entry.path}
-                    className="flex w-full items-center gap-3 rounded-xl border border-white/[0.065] bg-white/[0.025] px-3 py-3 text-left transition hover:bg-white/[0.055]"
+                    className="flex w-full items-center gap-3 rounded-xl border border-white/[0.11] bg-white/[0.045] px-3 py-3 text-left transition hover:border-white/[0.17] hover:bg-white/[0.08]"
                     onClick={() => setArtifact(entry)}
                   >
                     <CheckCircle2 className="size-4 shrink-0 text-emerald-400/70" />
                     <span className="min-w-0">
-                      <span className="block truncate text-xs font-semibold text-slate-300">
+                      <span className="block truncate text-xs font-semibold text-slate-200">
                         {entry.label}
                       </span>
-                      <span className="mt-0.5 block truncate text-[10px] text-slate-600">
+                      <span className="mt-0.5 block truncate text-[10px] text-slate-400">
                         {entry.path}
                       </span>
                     </span>

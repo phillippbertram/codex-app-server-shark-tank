@@ -37,7 +37,7 @@ export function CreatePitch() {
           <h1 className="mt-7 max-w-3xl text-5xl font-semibold leading-[1.02] tracking-[-0.045em] text-white xl:text-6xl">
             Put your startup in front of an AI investment committee.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-400">
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
             Specialized Codex threads research the pitch, challenge one another, pause for your
             answers, and produce one auditable investment memo.
           </p>
@@ -46,12 +46,12 @@ export function CreatePitch() {
             {features.map(([Icon, title, text]) => (
               <div
                 key={String(title)}
-                className="flex gap-3 rounded-2xl border border-white/[0.06] p-4"
+                className="flex gap-3 rounded-2xl border border-white/[0.11] bg-white/[0.025] p-4"
               >
                 <Icon className="mt-0.5 size-5 shrink-0 text-emerald-300" />
                 <div>
                   <div className="text-sm font-semibold text-slate-100">{String(title)}</div>
-                  <div className="mt-1 text-xs leading-5 text-slate-500">{String(text)}</div>
+                  <div className="mt-1 text-xs leading-5 text-slate-400">{String(text)}</div>
                 </div>
               </div>
             ))}
@@ -62,7 +62,7 @@ export function CreatePitch() {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/60 to-transparent" />
           <div className="mb-7 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
                 New pitch
               </p>
               <h2 className="mt-2 text-2xl font-semibold text-white">Meet the sharks</h2>
@@ -102,7 +102,7 @@ export function CreatePitch() {
               {busy ? "Opening the committee…" : "Start investment review"}
               <ArrowRight className="size-4" />
             </Button>
-            <p className="text-center text-xs leading-5 text-slate-500">
+            <p className="text-center text-xs leading-5 text-slate-400">
               The workflow runs locally. Agent tools have no network access.
             </p>
           </form>

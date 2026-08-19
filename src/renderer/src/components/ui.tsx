@@ -25,9 +25,9 @@ export function Button({
         {
           "bg-emerald-400 text-slate-950 shadow-[0_0_30px_rgba(52,211,153,0.15)] hover:bg-emerald-300":
             variant === "primary",
-          "border border-white/10 bg-white/[0.055] text-slate-100 hover:bg-white/[0.1]":
+          "border border-white/15 bg-white/[0.08] text-slate-100 hover:border-white/20 hover:bg-white/[0.13]":
             variant === "secondary",
-          "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100": variant === "ghost",
+          "text-slate-300 hover:bg-white/[0.08] hover:text-white": variant === "ghost",
           "border border-red-400/20 bg-red-400/10 text-red-200 hover:bg-red-400/15":
             variant === "danger",
           "h-9 px-3 text-xs": size === "sm",
@@ -46,7 +46,7 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/[0.075] bg-slate-950/55 shadow-[0_20px_60px_rgba(0,0,0,0.16)] backdrop-blur",
+        "rounded-2xl border border-white/[0.12] bg-[#0d1420] shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur",
         className,
       )}
       {...props}
@@ -58,7 +58,7 @@ export function Badge({ className, ...props }: HTMLAttributes<HTMLSpanElement>) 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border border-white/10 bg-white/[0.055] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400",
+        "inline-flex items-center rounded-full border border-white/15 bg-white/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-300",
         className,
       )}
       {...props}
@@ -87,17 +87,17 @@ export function Dialog({
         <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm data-[state=open]:animate-in" />
         <DialogPrimitive.Content
           className={cn(
-            "fixed left-1/2 top-1/2 z-50 max-h-[88vh] w-[min(900px,calc(100vw-40px))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-white/10 bg-[#0a101b] shadow-2xl outline-none",
+            "fixed left-1/2 top-1/2 z-50 max-h-[88vh] w-[min(900px,calc(100vw-40px))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-white/15 bg-[#0b121e] shadow-2xl outline-none",
             className,
           )}
         >
-          <header className="flex items-start justify-between border-b border-white/[0.07] px-7 py-6">
+          <header className="flex items-start justify-between border-b border-white/[0.11] px-7 py-6">
             <div>
               <DialogPrimitive.Title className="text-lg font-semibold text-white">
                 {title}
               </DialogPrimitive.Title>
               {description ? (
-                <DialogPrimitive.Description className="mt-1 text-sm text-slate-400">
+                <DialogPrimitive.Description className="mt-1 text-sm text-slate-300">
                   {description}
                 </DialogPrimitive.Description>
               ) : null}

@@ -36,7 +36,7 @@ export function ArtifactDialog({
     >
       <div className="max-h-[calc(88vh-100px)] overflow-y-auto px-8 py-7">
         {!content && !error ? (
-          <div className="flex h-48 items-center justify-center text-sm text-slate-500">
+          <div className="flex h-48 items-center justify-center text-sm text-slate-400">
             Loading artifact…
           </div>
         ) : null}
