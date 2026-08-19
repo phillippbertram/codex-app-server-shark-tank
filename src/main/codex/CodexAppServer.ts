@@ -1,0 +1,132 @@
+import { EventEmitter } from "node:events";
+import type { CodexStatus } from "../../shared/types.js";
+import type { InitializeParams } from "./generated/InitializeParams.js";
+import type { InitializeResponse } from "./generated/InitializeResponse.js";
+import type { RequestId } from "./generated/RequestId.js";
+import type { GetAccountResponse } from "./generated/v2/GetAccountResponse.js";
+import type { ThreadStartParams } from "./generated/v2/ThreadStartParams.js";
+import type { ThreadStartResponse } from "./generated/v2/ThreadStartResponse.js";
+import type { TurnInterruptParams } from "./generated/v2/TurnInterruptParams.js";
+import type { TurnInterruptResponse } from "./generated/v2/TurnInterruptResponse.js";
+import type { TurnStartParams } from "./generated/v2/TurnStartParams.js";
+import type { TurnStartResponse } from "./generated/v2/TurnStartResponse.js";
+import { JsonlRpcClient, JsonRpcErrorCode } from "./JsonlRpcClient.js";
+
+type MethodMessage = { id?: RequestId; method: string; params?: unknown };
+
+type CodexEvents = {
+  notification: [message: MethodMessage];
+  serverRequest: [message: MethodMessage & { id: RequestId }];
+  stderr: [line: string];
+  status: [status: CodexStatus];
+};
+
+export class CodexAppServer extends EventEmitter<CodexEvents> {
+  private readonly client = new JsonlRpcClient();
+  private status: CodexStatus = { state: "stopped", message: "App Server is stopped" };
+
+  constructor(private readonly root: string) {
+    super();
+    this.client.on("notification", (message) => this.emit("notification", message));
+    this.client.on("serverRequest", (message) => this.emit("serverRequest", message));
+    this.client.on("stderr", (line) => this.emit("stderr", line));
+    this.client.on("exit", (error) => {
+      this.setStatus({ state: "error", message: error.message });
+    });
+  }
+
+  getStatus(): CodexStatus {
+    return this.status;
+  }
+
+  async start(): Promise<CodexStatus> {
+    if (this.status.state === "ready" || this.status.state === "not_authenticated") {
+      return this.status;
+    }
+
+    this.setStatus({ state: "starting", message: "Starting Codex App Server…" });
+    this.client.start(
+      "codex",
+      [
+        "app-server",
+        "--stdio",
+        "-c",
+        'web_search="disabled"',
+        "-c",
+        "agents.enabled=false",
+        "-c",
+        "mcp_servers={}",
+      ],
+      this.root,
+    );
+
+    try {
+      const params: InitializeParams = {
+        clientInfo: {
+          name: "startup-shark-tank",
+          title: "Startup Shark Tank",
+          version: "0.1.0",
+        },
+        capabilities: {
+          experimentalApi: false,
+          requestAttestation: false,
+        },
+      };
+      const initialized = await this.client.request<InitializeResponse>("initialize", params);
+      this.client.notify("initialized");
+
+      const account = await this.client.request<GetAccountResponse>("account/read", {
+        refreshToken: false,
+      });
+      if (!account.account) {
+        this.setStatus({
+          state: "not_authenticated",
+          message: "Sign in from a terminal with `codex login`, then restart the app.",
+          userAgent: initialized.userAgent,
+        });
+      } else {
+        this.setStatus({
+          state: "ready",
+          message: "Codex App Server connected",
+          userAgent: initialized.userAgent,
+        });
+      }
+    } catch (error) {
+      this.setStatus({
+        state: "error",
+        message: error instanceof Error ? error.message : "Could not start Codex App Server",
+      });
+    }
+    return this.status;
+  }
+
+  startThread(params: ThreadStartParams): Promise<ThreadStartResponse> {
+    return this.client.request("thread/start", params);
+  }
+
+  startTurn(params: TurnStartParams): Promise<TurnStartResponse> {
+    return this.client.request("turn/start", params);
+  }
+
+  interruptTurn(params: TurnInterruptParams): Promise<TurnInterruptResponse> {
+    return this.client.request("turn/interrupt", params);
+  }
+
+  respond(id: RequestId, result: unknown): void {
+    this.client.respond(id, result);
+  }
+
+  respondError(id: RequestId, message: string): void {
+    this.client.respondError(id, JsonRpcErrorCode.methodNotFound, message);
+  }
+
+  close(): void {
+    this.client.close();
+    this.setStatus({ state: "stopped", message: "App Server is stopped" });
+  }
+
+  private setStatus(status: CodexStatus): void {
+    this.status = status;
+    this.emit("status", status);
+  }
+}

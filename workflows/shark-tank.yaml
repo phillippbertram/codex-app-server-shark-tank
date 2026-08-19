@@ -1,0 +1,103 @@
+id: shark-tank-v1
+name: Startup Shark Tank
+description: A visible investment committee workflow powered by isolated Codex App Server threads.
+nodes:
+  - id: market
+    label: Market Scout
+    type: agent
+    agent: shark-tank/market-scout.md
+    dependsOn: []
+    outputs:
+      - artifacts/market.md
+
+  - id: business
+    label: Business Model Analyst
+    type: agent
+    agent: shark-tank/business-analyst.md
+    dependsOn:
+      - market
+    outputs:
+      - artifacts/business.md
+
+  - id: product
+    label: Product Strategist
+    type: agent
+    agent: shark-tank/product-strategist.md
+    dependsOn:
+      - market
+    outputs:
+      - artifacts/product.md
+
+  - id: skeptic
+    label: Risk & Diligence Lead
+    type: agent
+    agent: shark-tank/risk-skeptic.md
+    dependsOn:
+      - business
+      - product
+    outputs:
+      - artifacts/risks.md
+
+  - id: committee-questions
+    label: Committee Questions
+    type: agent
+    agent: shark-tank/committee-questions.md
+    dependsOn:
+      - skeptic
+    outputs:
+      - committee/questions.json
+      - committee/questions.md
+
+  - id: founder-answers
+    label: Founder Q&A
+    type: human-input
+    dependsOn:
+      - committee-questions
+    outputs:
+      - human/founder-answers.md
+    form:
+      kind: question-set
+      source: committee/questions.json
+
+  - id: bullish
+    label: Bullish VC
+    type: agent
+    agent: shark-tank/bullish-vc.md
+    dependsOn:
+      - founder-answers
+    outputs:
+      - artifacts/bullish.md
+
+  - id: bearish
+    label: Bearish VC
+    type: agent
+    agent: shark-tank/bearish-vc.md
+    dependsOn:
+      - founder-answers
+    outputs:
+      - artifacts/bearish.md
+
+  - id: founder-rebuttal
+    label: Founder Rebuttal
+    type: human-input
+    dependsOn:
+      - bullish
+      - bearish
+    outputs:
+      - human/founder-rebuttal.md
+    form:
+      kind: long-text
+      context:
+        - artifacts/bullish.md
+        - artifacts/bearish.md
+      skippable: true
+
+  - id: verdict
+    label: Investment Committee
+    type: agent
+    agent: shark-tank/investment-committee.md
+    dependsOn:
+      - founder-rebuttal
+    outputs:
+      - investment-memo.md
+
