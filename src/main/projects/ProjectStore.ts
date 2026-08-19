@@ -35,10 +35,10 @@ export class ProjectStore {
   private readonly stateQueues = new Map<string, Promise<void>>();
 
   constructor(
-    root: string,
+    projectsRoot: string,
     private readonly workflow: WorkflowDefinition,
   ) {
-    this.projectsRoot = resolve(root, "projects");
+    this.projectsRoot = resolve(projectsRoot);
   }
 
   async initialize(): Promise<void> {

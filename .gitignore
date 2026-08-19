@@ -2,6 +2,7 @@ node_modules/
 .pnpm-store/
 out/
 dist/
+release/
 .DS_Store
 *.log
 

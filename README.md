@@ -37,7 +37,7 @@ Turn a startup pitch into an inspectable **INVEST** or **PASS** decision. Indepe
 ## Quick start
 
 > [!NOTE]
-> Startup Shark Tank is currently optimized for local development on macOS. Other platforms are not supported or verified yet.
+> Startup Shark Tank is currently packaged and verified for macOS. Other platforms are not supported or verified yet.
 
 **Requires:** macOS, Node.js `>=24 <25`, pnpm `11.15.1`, and the [`codex`](https://learn.chatgpt.com/docs) CLI on `PATH`.
 
@@ -47,7 +47,24 @@ codex login # skip when already signed in
 pnpm dev
 ```
 
+`pnpm dev` also restores the matching Electron runtime automatically when the local dependency store was recreated or relinked.
+
 Choose **Doggo** or **LedgerLift**, edit the pitch if desired, and start the investment review.
+
+## Build the macOS app
+
+The packaged app includes Electron, the UI, workflow, and all agent definitions. People using the app do not need Node.js, pnpm, or a repository checkout. They only need the [Codex CLI](https://learn.chatgpt.com/docs/codex/cli) installed and signed in once.
+
+```bash
+pnpm install
+pnpm dist:mac
+```
+
+The build writes an unsigned drag-to-install DMG and a ZIP archive to `release/`. By default it builds for the current Mac architecture; use `pnpm dist:mac:arm64` or `pnpm dist:mac:x64` for an explicit target. `pnpm package` creates an unpacked app for a quick local smoke test.
+
+The installed app finds standard Homebrew and user-local Codex installations even when launched from Finder. If Codex is installed elsewhere, set `STARTUP_SHARK_TANK_CODEX_PATH` to its absolute executable path before launching the app.
+
+For public distribution, configure the standard electron-builder Apple signing and notarization credentials and run `pnpm dist:mac:signed`. Local packages do not need release credentials.
 
 ## Product journey
 
@@ -116,7 +133,7 @@ flowchart TB
         preload["Narrow preload bridge"]
         main["Electron Main"]
         engine["Workflow engine"]
-        store["Project store"]
+        store["Project store<br/>Application Support"]
         adapter["App Server adapter"]
 
         renderer <-->|"validated IPC + AppEvents"| preload
@@ -234,6 +251,7 @@ projects/<slug>/
     └── runs/<runId>/events.jsonl
 ```
 
+- Development keeps projects in the repository's `projects/` directory. The installed app stores them under `~/Library/Application Support/Startup Shark Tank/projects/`.
 - State changes are atomic; persisted events are redacted.
 - Completed nodes and human input survive an app restart. Previously running nodes become resumable interruptions.
 - Agent tools can write only inside the pitch project and cannot access the network.
@@ -256,7 +274,7 @@ git diff --check
 
 For a full walkthrough, complete a LedgerLift run, use or edit a generated founder-answer draft, exercise Stop and Resume, inspect both parallel phases, and confirm the final memo and score in the sidebar.
 
-This is a local macOS development demo, not a signed distribution. It intentionally has no database, cloud queue, custom login flow, generic form builder, protocol playground, or synthetic approval probe.
+This is a local-first macOS app. Release signing and notarization require the distributor's Apple Developer credentials. It intentionally has no database, cloud queue, custom login flow, generic form builder, protocol playground, or synthetic approval probe.
 
 </details>
 

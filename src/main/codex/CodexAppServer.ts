@@ -1,4 +1,8 @@
 import { EventEmitter } from "node:events";
+import { constants } from "node:fs";
+import { access } from "node:fs/promises";
+import { homedir } from "node:os";
+import { delimiter, join } from "node:path";
 import type { CodexStatus } from "../../shared/types.js";
 import type { InitializeParams } from "./generated/InitializeParams.js";
 import type { InitializeResponse } from "./generated/InitializeResponse.js";
@@ -46,22 +50,23 @@ export class CodexAppServer extends EventEmitter<CodexEvents> {
     }
 
     this.setStatus({ state: "starting", message: "Starting Codex App Server…" });
-    this.client.start(
-      "codex",
-      [
-        "app-server",
-        "--stdio",
-        "-c",
-        'web_search="disabled"',
-        "-c",
-        "agents.enabled=false",
-        "-c",
-        "mcp_servers={}",
-      ],
-      this.root,
-    );
 
     try {
+      const command = await resolveCodexExecutable();
+      this.client.start(
+        command,
+        [
+          "app-server",
+          "--stdio",
+          "-c",
+          'web_search="disabled"',
+          "-c",
+          "agents.enabled=false",
+          "-c",
+          "mcp_servers={}",
+        ],
+        this.root,
+      );
       const params: InitializeParams = {
         clientInfo: {
           name: "startup-shark-tank",
@@ -147,4 +152,34 @@ export class CodexAppServer extends EventEmitter<CodexEvents> {
     this.status = status;
     this.emit("status", status);
   }
+}
+
+async function resolveCodexExecutable(): Promise<string> {
+  const executable = process.platform === "win32" ? "codex.exe" : "codex";
+  const pathCandidates = (process.env.PATH ?? "")
+    .split(delimiter)
+    .filter(Boolean)
+    .map((directory) => join(directory, executable));
+  const candidates = [
+    process.env.STARTUP_SHARK_TANK_CODEX_PATH,
+    ...pathCandidates,
+    "/opt/homebrew/bin/codex",
+    "/usr/local/bin/codex",
+    join(homedir(), ".local", "bin", executable),
+    join(homedir(), ".local", "share", "pnpm", executable),
+    join(homedir(), ".volta", "bin", executable),
+  ];
+
+  for (const candidate of new Set(candidates.filter((value): value is string => Boolean(value)))) {
+    try {
+      await access(candidate, constants.X_OK);
+      return candidate;
+    } catch {
+      // Continue through the known CLI installation locations.
+    }
+  }
+
+  throw new Error(
+    "Codex CLI was not found. Install Codex, sign in once from a terminal, and then restart the app.",
+  );
 }

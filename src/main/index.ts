@@ -13,15 +13,20 @@ let codex: CodexAppServer | undefined;
 app.setName("Startup Shark Tank");
 
 async function createApplication(): Promise<void> {
-  const root = app.getAppPath();
-  const appIcon = nativeImage.createFromPath(join(root, "resources/startup-shark-tank-logo.png"));
+  const applicationRoot = app.isPackaged ? process.resourcesPath : app.getAppPath();
+  const projectsRoot = app.isPackaged
+    ? join(app.getPath("userData"), "projects")
+    : join(applicationRoot, "projects");
+  const appIcon = nativeImage.createFromPath(
+    join(applicationRoot, "resources/startup-shark-tank-logo.png"),
+  );
   if (process.platform === "darwin" && !appIcon.isEmpty()) app.dock?.setIcon(appIcon);
 
-  const workflowDefinition = await loadWorkflow(root);
-  const store = new ProjectStore(root, workflowDefinition);
+  const workflowDefinition = await loadWorkflow(applicationRoot);
+  const store = new ProjectStore(projectsRoot, workflowDefinition);
   await store.initialize();
 
-  codex = new CodexAppServer(root);
+  codex = new CodexAppServer(app.isPackaged ? app.getPath("userData") : applicationRoot);
   const workflow = new WorkflowEngine(workflowDefinition, store, codex);
   registerIpc(store, workflow, codex);
 

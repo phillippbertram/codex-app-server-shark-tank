@@ -1,0 +1,45 @@
+appId: com.phillippbertram.startup-shark-tank
+productName: Startup Shark Tank
+asar: true
+
+directories:
+  output: release
+
+files:
+  - out/**/*
+  - package.json
+
+extraResources:
+  - from: agents
+    to: agents
+    filter:
+      - "**/*.md"
+  - from: workflows
+    to: workflows
+    filter:
+      - "**/*.yaml"
+  - from: resources
+    to: resources
+    filter:
+      - "startup-shark-tank-logo.png"
+
+mac:
+  category: public.app-category.business
+  icon: resources/startup-shark-tank-logo.png
+  target:
+    - dmg
+    - zip
+
+dmg:
+  title: "${productName} ${version}"
+  backgroundColor: "#080d16"
+  contents:
+    - x: 140
+      y: 220
+      type: file
+    - x: 400
+      y: 220
+      type: link
+      path: /Applications
+
+artifactName: "Startup-Shark-Tank-${version}-${arch}.${ext}"
