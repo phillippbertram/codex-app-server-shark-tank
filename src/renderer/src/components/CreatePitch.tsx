@@ -1,18 +1,23 @@
 import type { LucideIcon } from "lucide-react";
 import { ArrowRight, Bot, Braces, GitBranch, ShieldCheck, Sparkles } from "lucide-react";
 import { type FormEvent, useState } from "react";
+import { defaultPitchPreset, type PitchPreset, pitchPresets } from "../data/pitchPresets";
 import { useAppStore } from "../store/useAppStore";
 import { Badge, Button, Card } from "./ui";
 
 export function CreatePitch() {
   const { createAndStart, busy, codex } = useAppStore();
-  const [name, setName] = useState("Doggo");
-  const [targetMarket, setTargetMarket] = useState(
-    "Urban dog owners and independent pet-care providers",
-  );
-  const [pitch, setPitch] = useState(
-    "Doggo is a trusted marketplace that helps urban dog owners find vetted, available walkers in minutes. Owners get consistent care, live walk updates, and simple recurring bookings; independent walkers get predictable local demand and tools to run their business. We start neighborhood by neighborhood, charge a fee on each booking, and build trust through verified identities, service history, and transparent quality signals.",
-  );
+  const [selectedPresetId, setSelectedPresetId] = useState(defaultPitchPreset.id);
+  const [name, setName] = useState(defaultPitchPreset.name);
+  const [targetMarket, setTargetMarket] = useState(defaultPitchPreset.targetMarket);
+  const [pitch, setPitch] = useState(defaultPitchPreset.pitch);
+
+  const selectPreset = (preset: PitchPreset) => {
+    setSelectedPresetId(preset.id);
+    setName(preset.name);
+    setTargetMarket(preset.targetMarket);
+    setPitch(preset.pitch);
+  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -72,6 +77,37 @@ export function CreatePitch() {
             </div>
           </div>
           <form className="space-y-5" onSubmit={submit}>
+            <fieldset>
+              <legend className="field-label">Example pitch</legend>
+              <p className="mb-3 mt-1 text-xs leading-5 text-slate-400">
+                Choose a starting point. You can edit every field.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {pitchPresets.map((preset) => {
+                  const selected = preset.id === selectedPresetId;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      aria-pressed={selected}
+                      className={`rounded-xl border px-4 py-3 text-left transition ${
+                        selected
+                          ? "border-emerald-300/45 bg-emerald-300/10 text-white"
+                          : "border-white/[0.12] bg-white/[0.035] text-slate-300 hover:border-white/25 hover:bg-white/[0.07]"
+                      }`}
+                      onClick={() => selectPreset(preset)}
+                    >
+                      <span className="block text-sm font-semibold">{preset.name}</span>
+                      <span
+                        className={`mt-1 block text-[11px] ${selected ? "text-emerald-200" : "text-slate-400"}`}
+                      >
+                        {preset.category}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
             <label className="block">
               <span className="field-label">Startup name</span>
               <input value={name} onChange={(event) => setName(event.target.value)} required />

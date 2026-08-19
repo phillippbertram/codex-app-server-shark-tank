@@ -102,6 +102,10 @@ export type Question = {
   id: string;
   question: string;
   reason: string;
+  suggestions?: {
+    confident: string;
+    cautious: string;
+  };
 };
 
 export type ArtifactContent = {

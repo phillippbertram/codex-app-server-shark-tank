@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
 import { access } from "node:fs/promises";
-import { committeeQuestionsSchema } from "../../shared/schemas.js";
+import { generatedCommitteeQuestionsSchema } from "../../shared/schemas.js";
 import type {
   AppEvent,
   ApprovalDecision,
@@ -195,22 +195,33 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
 
     const output = definition.outputs[0];
     if (!output) throw new Error("Human node has no output");
+    if (input.skipped && !definition.form?.skippable) {
+      throw new Error("This human input cannot be skipped");
+    }
     if (definition.form?.kind === "question-set") {
-      const questions = (await this.store.snapshot(input.projectId)).questions;
-      const answers = input.answers ?? {};
-      const missing = questions.find((question) => !answers[question.id]?.trim());
-      if (missing) throw new Error("Please answer all committee questions");
-      const markdown = [
-        "# Founder answers",
-        "",
-        ...questions.flatMap((question) => [
-          `## ${question.question}`,
+      if (input.skipped) {
+        await this.store.writeArtifact(
+          input.projectId,
+          output,
+          "# Founder answers\n\nThe founder skipped the committee Q&A. No additional founder evidence was provided.\n",
+        );
+      } else {
+        const questions = (await this.store.snapshot(input.projectId)).questions;
+        const answers = input.answers ?? {};
+        const missing = questions.find((question) => !answers[question.id]?.trim());
+        if (missing) throw new Error("Please answer all committee questions");
+        const markdown = [
+          "# Founder answers",
           "",
-          answers[question.id]?.trim() ?? "",
-          "",
-        ]),
-      ].join("\n");
-      await this.store.writeArtifact(input.projectId, output, `${markdown.trim()}\n`);
+          ...questions.flatMap((question) => [
+            `## ${question.question}`,
+            "",
+            answers[question.id]?.trim() ?? "",
+            "",
+          ]),
+        ].join("\n");
+        await this.store.writeArtifact(input.projectId, output, `${markdown.trim()}\n`);
+      }
     } else {
       const content = input.skipped
         ? "# Founder rebuttal\n\nThe founder chose not to add a rebuttal.\n"
@@ -656,7 +667,7 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
     } catch (error) {
       throw new Error("Committee questions were not valid structured JSON", { cause: error });
     }
-    const result = committeeQuestionsSchema.parse(json);
+    const result = generatedCommitteeQuestionsSchema.parse(json);
     await this.store.writeArtifact(
       projectId,
       "committee/questions.md",
@@ -732,11 +743,20 @@ const committeeQuestionsJsonSchema = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["id", "question", "reason"],
+        required: ["id", "question", "reason", "suggestions"],
         properties: {
           id: { type: "string", enum: ["q1", "q2", "q3"] },
           question: { type: "string" },
           reason: { type: "string" },
+          suggestions: {
+            type: "object",
+            additionalProperties: false,
+            required: ["confident", "cautious"],
+            properties: {
+              confident: { type: "string" },
+              cautious: { type: "string" },
+            },
+          },
         },
       },
     },

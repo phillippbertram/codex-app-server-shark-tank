@@ -1,5 +1,5 @@
 import type { ArtifactContent, ProjectSnapshot, WorkflowNodeDefinition } from "@shared/types";
-import { MessageSquareQuote, Send, SkipForward, Swords } from "lucide-react";
+import { MessageSquareQuote, Send, SkipForward, Sparkles, Swords } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
 import { useAppStore } from "../store/useAppStore";
 import { Button, Card } from "./ui";
@@ -53,13 +53,16 @@ function QuestionGate({
       </header>
       <form className="space-y-7 p-7" onSubmit={submit}>
         {snapshot.questions.map((question, index) => (
-          <label className="block" key={question.id}>
+          <div className="block" key={question.id}>
             <div className="flex gap-3">
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-xs font-bold text-slate-300">
                 {index + 1}
               </span>
               <div>
-                <span className="block text-sm font-semibold leading-6 text-slate-100">
+                <span
+                  id={`question-${question.id}`}
+                  className="block text-sm font-semibold leading-6 text-slate-100"
+                >
                   {question.question}
                 </span>
                 <span className="mt-1 block text-xs leading-5 text-slate-400">
@@ -67,16 +70,51 @@ function QuestionGate({
                 </span>
               </div>
             </div>
+            {question.suggestions ? (
+              <div className="ml-10 mt-3 grid gap-2 md:grid-cols-2">
+                {(
+                  [
+                    ["confident", "Confident", question.suggestions.confident],
+                    ["cautious", "Cautious", question.suggestions.cautious],
+                  ] as const
+                ).map(([kind, label, text]) => (
+                  <button
+                    key={kind}
+                    type="button"
+                    className="group rounded-xl border border-white/[0.12] bg-white/[0.035] p-3 text-left transition hover:border-amber-200/30 hover:bg-amber-200/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/50"
+                    onClick={() => setAnswers((current) => ({ ...current, [question.id]: text }))}
+                  >
+                    <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-200/80">
+                      <Sparkles className="size-3" /> Demo draft · {label}
+                    </span>
+                    <span className="mt-2 line-clamp-4 block text-xs leading-5 text-slate-300 group-hover:text-slate-200">
+                      {text}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <textarea
               className="mt-3 min-h-24 resize-y"
+              aria-labelledby={`question-${question.id}`}
               placeholder="Give the committee a concrete answer…"
               value={answers[question.id] ?? ""}
               onChange={(event) => setAnswers({ ...answers, [question.id]: event.target.value })}
               required
             />
-          </label>
+          </div>
         ))}
-        <div className="flex justify-end">
+        <div className="flex flex-wrap justify-end gap-2">
+          {node.form?.skippable ? (
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => void submitHuman({ nodeId: node.id, skipped: true })}
+            >
+              <SkipForward className="size-4" /> Skip founder Q&A
+            </Button>
+          ) : null}
           <Button disabled={busy} type="submit">
             Submit all answers <Send className="size-4" />
           </Button>

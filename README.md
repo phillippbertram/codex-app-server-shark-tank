@@ -12,7 +12,7 @@ The application uses the [Codex App Server](https://learn.chatgpt.com/docs/app-s
 - two genuinely parallel workflow phases through the same App Server process;
 - item, command, and file-change events in a compact Developer Inspector;
 - real command and file-change approvals when Codex requests them;
-- structured output for the three committee questions;
+- structured output for the three committee questions and their editable demo answers;
 - interruption, persisted state, retry, and resume after an app restart;
 - project-scoped workspace write access with agent network access disabled;
 - filesystem artifacts as human-readable shared state.
@@ -34,7 +34,7 @@ pnpm install
 pnpm dev
 ```
 
-The first screen contains a ready-to-run Doggo pitch. Submit it, watch the specialists build their artifacts, answer the committee questions, respond to or skip the rebuttal, and inspect the final verdict.
+The first screen contains two ready-to-run, fully editable pitches: Doggo, a consumer marketplace, and LedgerLift, a B2B cash-flow product. Submit either example, watch the specialists build their artifacts, use or edit the generated founder-answer drafts, skip a human gate when desired, and inspect the final verdict.
 
 ## Decision flow
 
@@ -45,7 +45,7 @@ Market Scout
                                         │
                                 Committee Questions
                                         │
-                                  Founder Answers
+                            Founder Answers or Skip
                                         │
                               ┌─────────┴─────────┐
                            Bullish VC          Bearish VC
@@ -116,7 +116,7 @@ pnpm build
 git diff --check
 ```
 
-For the full acceptance path, complete one Doggo run, confirm that both parallel phases overlap in the Inspector, restart at the first human gate, and exercise Stop followed by Resume during a running node.
+For the full acceptance path, verify both pitch presets and complete a LedgerLift run using the generated founder-answer drafts. Confirm that both parallel phases overlap in the Inspector, restart at the first human gate, verify that skipping it still produces the founder-answer artifact, and exercise Stop followed by Resume during a running node.
 
 ## Scope
 

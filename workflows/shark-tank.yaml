@@ -62,6 +62,7 @@ nodes:
     form:
       kind: question-set
       source: committee/questions.json
+      skippable: true
 
   - id: bullish
     label: Bullish VC

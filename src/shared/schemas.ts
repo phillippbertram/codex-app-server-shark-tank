@@ -32,17 +32,34 @@ export const approvalRespondSchema = z.object({
   decision: z.enum(["accept", "acceptForSession", "decline", "cancel"]),
 });
 
+const questionBaseSchema = z.object({
+  id: z.string().regex(/^q[1-3]$/),
+  question: z.string().min(8).max(500),
+  reason: z.string().min(8).max(500),
+});
+
+const questionSuggestionsSchema = z.object({
+  confident: z.string().min(20).max(1_500),
+  cautious: z.string().min(20).max(1_500),
+});
+
+const withUniqueQuestionIds = <T extends { id: string }>(questions: T[]) =>
+  new Set(questions.map((question) => question.id)).size === 3;
+
 export const committeeQuestionsSchema = z.object({
   questions: z
-    .array(
-      z.object({
-        id: z.string().regex(/^q[1-3]$/),
-        question: z.string().min(8).max(500),
-        reason: z.string().min(8).max(500),
-      }),
-    )
+    .array(questionBaseSchema.extend({ suggestions: questionSuggestionsSchema.optional() }))
     .length(3)
-    .refine((questions) => new Set(questions.map((question) => question.id)).size === 3, {
+    .refine(withUniqueQuestionIds, {
+      message: "Committee question IDs must be q1, q2, and q3",
+    }),
+});
+
+export const generatedCommitteeQuestionsSchema = z.object({
+  questions: z
+    .array(questionBaseSchema.extend({ suggestions: questionSuggestionsSchema }))
+    .length(3)
+    .refine(withUniqueQuestionIds, {
       message: "Committee question IDs must be q1, q2, and q3",
     }),
 });
