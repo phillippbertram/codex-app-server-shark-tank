@@ -7,12 +7,13 @@ export type PitchPreset = {
 };
 
 export const defaultPitchPreset: PitchPreset = {
-  id: "doggo",
-  name: "Doggo",
-  category: "Consumer marketplace",
-  targetMarket: "Urban dog owners and independent pet-care providers",
+  id: "civicray",
+  name: "CivicRay",
+  category: "Vertical SaaS",
+  targetMarket:
+    "Residential solar installers completing 100–2,000 projects per year in fragmented U.S. permitting markets",
   pitch:
-    "Doggo is a trusted marketplace that helps urban dog owners find vetted, available walkers in minutes. Owners get consistent care, live walk updates, and simple recurring bookings; independent walkers get predictable local demand and tools to run their business. We start neighborhood by neighborhood, charge a fee on each booking, and build trust through verified identities, service history, and transparent quality signals.",
+    "CivicRay is the permit operations platform for residential solar installers. It turns system designs and address data into jurisdiction-specific checklists and submission-ready permit packages, then learns from verified reviewer corrections to keep local requirements current. Over the last nine months, 24 paying installers processed 6,800 permits through CivicRay; 93% were accepted on the first submission versus 61% before adoption, and median preparation time fell from 110 to 18 minutes. CivicRay has $42k in monthly recurring revenue, 88% gross margin, 124% six-month net revenue retention, and 4.5-month customer acquisition payback. It charges a platform subscription plus a per-project fee and expands from permitting into inspections and utility interconnection.",
 };
 
 export const pitchPresets: PitchPreset[] = [

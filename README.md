@@ -19,16 +19,16 @@
 
 Turn a startup pitch into an inspectable **INVEST** or **PASS** decision. Independent Codex agents analyze the opportunity, challenge each other through shared files, pause for founder input, and produce one auditable investment memo.
 
-![LedgerLift workflow paused for founder questions](docs/images/workflow-q-and-a.png)
+![CivicRay workflow paused for founder questions](docs/images/workflow-q-and-a.png)
 
 <table>
   <tr>
     <td width="50%" align="center">
-      <img src="docs/images/new-pitch.png" alt="LedgerLift example selected in the editable New Pitch form">
+      <img src="docs/images/new-pitch.png" alt="CivicRay example selected in the editable New Pitch form">
       <br><sub><strong>Start with an editable example pitch</strong></sub>
     </td>
     <td width="50%" align="center">
-      <img src="docs/images/final-verdict.png" alt="LedgerLift PASS verdict with a circular conviction score and investment memo">
+      <img src="docs/images/final-verdict.png" alt="CivicRay INVEST verdict with a circular conviction score and investment memo">
       <br><sub><strong>Finish with a complete decision record</strong></sub>
     </td>
   </tr>
@@ -49,7 +49,7 @@ pnpm dev
 
 `pnpm dev` also restores the matching Electron runtime automatically when the local dependency store was recreated or relinked.
 
-Choose **Doggo** or **LedgerLift**, edit the pitch if desired, and start the investment review.
+Choose **CivicRay** or **LedgerLift**, edit the pitch if desired, and start the investment review.
 
 ## Build the macOS app
 
@@ -272,7 +272,7 @@ pnpm build
 git diff --check
 ```
 
-For a full walkthrough, complete a LedgerLift run, use or edit a generated founder-answer draft, exercise Stop and Resume, inspect both parallel phases, and confirm the final memo and score in the sidebar.
+For a full walkthrough, complete a CivicRay run, use or edit a generated founder-answer draft, exercise Stop and Resume, inspect both parallel phases, and confirm the final memo and score in the sidebar.
 
 This is a local-first macOS app. Release signing and notarization require the distributor's Apple Developer credentials. It intentionally has no database, cloud queue, custom login flow, generic form builder, protocol playground, or synthetic approval probe.
 
