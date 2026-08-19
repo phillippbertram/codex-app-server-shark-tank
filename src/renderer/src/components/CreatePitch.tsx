@@ -32,7 +32,7 @@ export function CreatePitch() {
       <div className="relative mx-auto grid w-full max-w-7xl gap-14 px-12 py-20 xl:grid-cols-[1.05fr_0.95fr] xl:items-center">
         <section>
           <Badge className="border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
-            Codex App Server portfolio demo
+            Codex App Server demo
           </Badge>
           <h1 className="mt-7 max-w-3xl text-5xl font-semibold leading-[1.02] tracking-[-0.045em] text-white xl:text-6xl">
             Put your startup in front of an AI investment committee.

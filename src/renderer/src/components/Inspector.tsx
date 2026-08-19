@@ -15,10 +15,10 @@ export function Inspector({
   events: InspectorEvent[];
   onClose: () => void;
 }) {
-  const filtered = useMemo(
-    () => (node ? events.filter((event) => event.nodeId === node.id) : events),
-    [events, node],
-  );
+  const filtered = useMemo(() => {
+    const scopedEvents = node ? events.filter((event) => event.nodeId === node.id) : events;
+    return [...scopedEvents].reverse();
+  }, [events, node]);
 
   return (
     <aside className="flex w-[390px] shrink-0 flex-col border-l border-white/[0.11] bg-[#090f19]">

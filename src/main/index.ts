@@ -26,8 +26,8 @@ async function createApplication(): Promise<void> {
     minWidth: 1080,
     minHeight: 720,
     show: false,
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 18, y: 18 },
+    titleBarStyle: "default",
+    backgroundColor: "#080d16",
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
       contextIsolation: true,

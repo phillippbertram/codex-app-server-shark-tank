@@ -335,7 +335,7 @@ export class WorkflowEngine extends EventEmitter<EngineEvents> {
         approvalsReviewer: "user",
         sandbox: "workspace-write",
         baseInstructions:
-          "You are a focused local analyst inside a portfolio demo. Follow the developer instructions and use only the project files named in the turn. Do not inspect global memory, configuration, account, skill, plugin, or agent files. Do not use web search, MCP tools, plugins, network access, or subagents. Use local file and command tools only when needed to create and verify the requested project artifacts.",
+          "You are a focused local analyst inside a workflow demo. Follow the developer instructions and use only the project files named in the turn. Do not inspect global memory, configuration, account, skill, plugin, or agent files. Do not use web search, MCP tools, plugins, network access, or subagents. Use local file and command tools only when needed to create and verify the requested project artifacts.",
         developerInstructions: instructions,
         serviceName: "startup-shark-tank",
         ephemeral: true,
