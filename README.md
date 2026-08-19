@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="resources/startup-shark-tank-logo.png" alt="Startup Shark Tank logo with three shark investors reviewing a startup" width="280">
+</p>
+
 <h1 align="center">Startup Shark Tank</h1>
 
 <p align="center">

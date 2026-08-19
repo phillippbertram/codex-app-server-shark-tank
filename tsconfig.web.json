@@ -18,6 +18,7 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
+      "@assets/*": ["resources/*"],
       "@renderer/*": ["src/renderer/src/*"],
       "@shared/*": ["src/shared/*"]
     }

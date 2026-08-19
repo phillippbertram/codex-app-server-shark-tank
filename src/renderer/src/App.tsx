@@ -1,9 +1,9 @@
+import sharkTankLogo from "@assets/startup-shark-tank-logo.png";
 import type { ProjectSummary } from "@shared/types";
 import {
   AlertTriangle,
   CalendarDays,
   CirclePlus,
-  FishSymbol,
   LoaderCircle,
   RotateCcw,
   Settings2,
@@ -54,9 +54,12 @@ export function App() {
     <div className="flex h-screen overflow-hidden bg-[#080d16] text-slate-200">
       <aside className="flex w-64 shrink-0 flex-col border-r border-white/[0.11] bg-[#080d15] pt-6">
         <div className="flex items-center gap-3 px-5 pb-6">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-400 text-slate-950 shadow-[0_0_30px_rgba(52,211,153,0.18)]">
-            <FishSymbol className="size-5" />
-          </div>
+          <img
+            src={sharkTankLogo}
+            alt=""
+            aria-hidden="true"
+            className="size-12 shrink-0 object-contain drop-shadow-[0_0_18px_rgba(56,189,248,0.2)]"
+          />
           <div>
             <div className="text-sm font-bold tracking-tight text-white">Startup Shark Tank</div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-400">

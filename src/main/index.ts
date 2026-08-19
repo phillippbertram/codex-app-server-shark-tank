@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, nativeImage } from "electron";
 import { IPC } from "../shared/ipc.js";
 import { CodexAppServer } from "./codex/CodexAppServer.js";
 import { registerIpc } from "./ipc/registerIpc.js";
@@ -10,8 +10,13 @@ import { WorkflowEngine } from "./workflow/WorkflowEngine.js";
 let mainWindow: BrowserWindow | undefined;
 let codex: CodexAppServer | undefined;
 
+app.setName("Startup Shark Tank");
+
 async function createApplication(): Promise<void> {
   const root = app.getAppPath();
+  const appIcon = nativeImage.createFromPath(join(root, "resources/startup-shark-tank-logo.png"));
+  if (process.platform === "darwin" && !appIcon.isEmpty()) app.dock?.setIcon(appIcon);
+
   const workflowDefinition = await loadWorkflow(root);
   const store = new ProjectStore(root, workflowDefinition);
   await store.initialize();
@@ -26,6 +31,7 @@ async function createApplication(): Promise<void> {
     minWidth: 1080,
     minHeight: 720,
     show: false,
+    icon: appIcon.isEmpty() ? undefined : appIcon,
     titleBarStyle: "default",
     backgroundColor: "#080d16",
     webPreferences: {

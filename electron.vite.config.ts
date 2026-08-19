@@ -13,6 +13,7 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
+        "@assets": resolve("resources"),
         "@renderer": resolve("src/renderer/src"),
         "@shared": resolve("src/shared"),
       },

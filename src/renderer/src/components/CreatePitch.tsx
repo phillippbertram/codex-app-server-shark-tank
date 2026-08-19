@@ -1,5 +1,6 @@
+import sharkTankLogo from "@assets/startup-shark-tank-logo.png";
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight, Bot, Braces, GitBranch, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Bot, Braces, GitBranch, ShieldCheck } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { defaultPitchPreset, type PitchPreset, pitchPresets } from "../data/pitchPresets";
 import { useAppStore } from "../store/useAppStore";
@@ -72,9 +73,12 @@ export function CreatePitch() {
               </p>
               <h2 className="mt-2 text-2xl font-semibold text-white">Meet the sharks</h2>
             </div>
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300">
-              <Sparkles className="size-5" />
-            </div>
+            <img
+              src={sharkTankLogo}
+              alt=""
+              aria-hidden="true"
+              className="size-16 object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.18)]"
+            />
           </div>
           <form className="space-y-5" onSubmit={submit}>
             <fieldset>
