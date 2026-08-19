@@ -10,6 +10,7 @@
 
 <p align="center">
   <img alt="Electron 43" src="https://img.shields.io/badge/Electron-43-47848F?logo=electron&logoColor=white">
+  <img alt="Optimized for macOS" src="https://img.shields.io/badge/Optimized_for-macOS-000000?logo=apple&logoColor=white">
   <img alt="React 19" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=0B1020">
   <img alt="TypeScript 5.9" src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white">
   <img alt="Codex App Server" src="https://img.shields.io/badge/Codex-App_Server-10A37F">
@@ -34,6 +35,9 @@ Turn a startup pitch into an inspectable **INVEST** or **PASS** decision. Indepe
 </table>
 
 ## Quick start
+
+> [!NOTE]
+> Startup Shark Tank is currently optimized for local development on macOS. Other platforms are not supported or verified yet.
 
 **Requires:** macOS, Node.js `>=24 <25`, pnpm `11.15.1`, and the [`codex`](https://learn.chatgpt.com/docs) CLI on `PATH`.
 
