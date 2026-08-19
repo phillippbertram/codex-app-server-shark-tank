@@ -89,6 +89,7 @@ export type ProjectMetadata = {
 
 export type ProjectSummary = ProjectMetadata & {
   runStatus: WorkflowState["status"];
+  finalScore?: number;
 };
 
 export type ArtifactSummary = {
@@ -140,6 +141,7 @@ export type ProjectSnapshot = {
   project: ProjectMetadata;
   workflow: WorkflowDefinition;
   state?: WorkflowState;
+  finalScore?: number;
   artifacts: ArtifactSummary[];
   questions: Question[];
   events: InspectorEvent[];

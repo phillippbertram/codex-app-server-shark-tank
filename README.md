@@ -15,6 +15,8 @@ The application uses the [Codex App Server](https://learn.chatgpt.com/docs/app-s
 - structured output for the three committee questions and their editable demo answers;
 - dated pitch projects with recoverable removal through the macOS Trash;
 - an accessible circular conviction score in the final verdict;
+- a sticky workflow roadmap with parallel stages, live node durations, and status-aware cards;
+- final conviction scores surfaced discreetly in the pitch project list;
 - interruption, persisted state, retry, and resume after an app restart;
 - project-scoped workspace write access with agent network access disabled;
 - filesystem artifacts as human-readable shared state.
@@ -120,7 +122,7 @@ pnpm build
 git diff --check
 ```
 
-For the full acceptance path, verify both pitch presets and complete a LedgerLift run using the generated founder-answer drafts. Confirm that both parallel phases overlap in the Inspector, restart at the first human gate, verify that skipping it still produces the founder-answer artifact, and exercise Stop followed by Resume during a running node. Confirm that pitch dates stay unchanged throughout the run, that a running project cannot be removed, and that a stopped or completed project moves to the macOS Trash. Check the circular conviction indicator at the final verdict.
+For the full acceptance path, verify both pitch presets and complete a LedgerLift run using the generated founder-answer drafts. Confirm that the sticky roadmap shows both parallel phases, keeps the active node visible at narrow widths, and agrees with the detailed cards and their live durations. Restart at the first human gate, verify that skipping it still produces the founder-answer artifact, and exercise Stop followed by Resume during a running node. Confirm that pitch dates stay unchanged throughout the run, that a running project cannot be removed, and that a stopped or completed project moves to the macOS Trash. Check the circular conviction indicator and the matching sidebar score at the final verdict.
 
 ## Scope
 

@@ -86,24 +86,28 @@ export function App() {
                     active?.project.id === project.id && "border-white/[0.11] bg-white/[0.08]",
                   )}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-xs font-semibold text-slate-200">
-                      {project.name}
-                    </span>
-                    <span
-                      className={cn(
-                        "size-1.5 shrink-0 rounded-full",
-                        projectStatusColor(project.runStatus),
-                      )}
-                    />
-                  </div>
+                  <span className="block truncate text-xs font-semibold text-slate-200">
+                    {project.name}
+                  </span>
                   <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-400">
                     {project.targetMarket}
                   </p>
-                  <p className="mt-2 flex items-center gap-1.5 text-[9px] font-medium text-slate-400">
-                    <CalendarDays className="size-3" /> {formatProjectDate(project.createdAt)}
-                  </p>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <p className="flex items-center gap-1.5 text-[9px] font-medium text-slate-400">
+                      <CalendarDays className="size-3" /> {formatProjectDate(project.createdAt)}
+                    </p>
+                    {project.runStatus === "completed" && project.finalScore !== undefined ? (
+                      <span className="rounded-md border border-white/[0.1] bg-white/[0.055] px-1.5 py-0.5 text-[9px] font-semibold tabular-nums text-slate-300">
+                        {project.finalScore}/100
+                      </span>
+                    ) : null}
+                  </div>
                 </button>
+                <span className="pointer-events-none absolute right-2 top-2 flex size-7 items-center justify-center opacity-100 transition group-hover:opacity-0 group-focus-within:opacity-0">
+                  <span
+                    className={cn("size-1.5 rounded-full", projectStatusColor(project.runStatus))}
+                  />
+                </span>
                 <button
                   type="button"
                   aria-label={`Delete ${project.name}`}

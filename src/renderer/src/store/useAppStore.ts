@@ -163,6 +163,7 @@ function applyEvent(
     const summary: ProjectSummary = {
       ...event.snapshot.project,
       runStatus: event.snapshot.state?.status ?? "idle",
+      ...(event.snapshot.finalScore !== undefined ? { finalScore: event.snapshot.finalScore } : {}),
     };
     set({
       active: event.snapshot,

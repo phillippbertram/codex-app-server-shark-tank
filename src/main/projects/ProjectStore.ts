@@ -107,7 +107,13 @@ export class ProjectStore {
       try {
         const metadata = await this.readMetadata(entry.name);
         const state = await this.readState(entry.name);
-        projects.push({ ...metadata, runStatus: state?.status ?? "idle" });
+        const finalScore =
+          state?.status === "completed" ? await this.readFinalScore(entry.name) : undefined;
+        projects.push({
+          ...metadata,
+          runStatus: state?.status ?? "idle",
+          ...(finalScore !== undefined ? { finalScore } : {}),
+        });
       } catch {
         // A malformed project should not prevent the rest of the portfolio from loading.
       }
@@ -123,10 +129,13 @@ export class ProjectStore {
       this.readQuestions(projectId),
       this.readEvents(projectId),
     ]);
+    const finalScore =
+      state?.status === "completed" ? await this.readFinalScore(projectId) : undefined;
     return {
       project,
       workflow: this.workflow,
       ...(state ? { state } : {}),
+      ...(finalScore !== undefined ? { finalScore } : {}),
       artifacts,
       questions,
       events,
@@ -222,6 +231,25 @@ export class ProjectStore {
       return committeeQuestionsSchema.parse(raw).questions;
     } catch {
       return [];
+    }
+  }
+
+  private async readFinalScore(projectId: string): Promise<number | undefined> {
+    try {
+      const parsed = matter(
+        await readFile(this.resolveProjectPath(projectId, "investment-memo.md"), "utf8"),
+      );
+      const raw = parsed.data.score;
+      if (
+        (typeof raw !== "number" && typeof raw !== "string") ||
+        (typeof raw === "string" && !raw.trim())
+      ) {
+        return undefined;
+      }
+      const score = Number(raw);
+      return Number.isFinite(score) ? Math.min(100, Math.max(0, Math.round(score))) : undefined;
+    } catch {
+      return undefined;
     }
   }
 
