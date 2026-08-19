@@ -17,7 +17,7 @@
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/License-MIT-f5c518"></a>
 </p>
 
-Turn a startup pitch into an inspectable **INVEST** or **PASS** decision. Independent Codex agents analyze the opportunity, challenge each other through shared files, pause for founder input, and produce one auditable investment memo.
+Turn a startup pitch into an inspectable **INVEST** or **PASS** decision. Independent Codex agents analyze the opportunity, challenge each other through shared files, pause for founder input, and produce one auditable investment memo. Selected research agents can use configurable Cached or Live Codex Web Search while shell tools stay network-isolated.
 
 ![CivicRay workflow paused for founder questions](docs/images/workflow-q-and-a.png)
 
@@ -122,7 +122,7 @@ flowchart LR
     class verdict outcome
 ```
 
-The generic engine only knows `agent` and `human-input` nodes. The graph lives in [`workflows/shark-tank.yaml`](workflows/shark-tank.yaml); specialist instructions live in [`agents/shark-tank`](agents/shark-tank).
+The generic engine only knows `agent` and `human-input` nodes. The graph lives in [`workflows/shark-tank.yaml`](workflows/shark-tank.yaml); specialist instructions live in [`agents/shark-tank`](agents/shark-tank). For a detailed walkthrough of scheduling, state transitions, concurrency, human gates, recovery, and research selection, see [Workflow Engine in Startup Shark Tank](docs/workflow-engine/README.md).
 
 ## Architecture
 
@@ -145,10 +145,12 @@ flowchart TB
 
     server["codex app-server --stdio"]
     codex["Codex"]
+    web["Codex Web Search<br/>Cached or Live"]
     files[("projects/&lt;slug&gt;<br/>Markdown · JSON · JSONL")]
 
     adapter <-->|"JSON-RPC 2.0 over JSONL"| server
     server <--> codex
+    server -.->|"selected research agents"| web
     store <--> files
     server -->|"project-scoped writes"| files
 
@@ -156,7 +158,7 @@ flowchart TB
     classDef protocol fill:#1e1633,stroke:#a78bfa,color:#ede9fe
     classDef data fill:#0d2b22,stroke:#34d399,color:#d1fae5
     class renderer,preload,main,engine,store,adapter app
-    class server,codex protocol
+    class server,codex,web protocol
     class files data
 ```
 
@@ -168,6 +170,30 @@ The [Codex App Server](https://learn.chatgpt.com/docs/app-server) is the interfa
 
 That makes it a better fit here than a background job abstraction: the desktop app needs to show live work, route real approvals to the founder, stop active turns, and explain every step in its Developer Inspector. For CI and unattended automation, OpenAI recommends the Codex SDK instead.
 
+For a project-specific walkthrough of the handshake, message shapes, thread lifecycle, capability flags, and transport choices, see [Codex App Server in Startup Shark Tank](docs/app-server/README.md).
+
+### Where can I inspect the communication?
+
+There is no single OpenAI web page that shows the raw JSONL conversation between this app and its
+App Server. Those protocol messages stay on the local machine between Electron and the child
+process over stdio. Startup Shark Tank also does not configure its own OpenAI API key or Platform
+project: it uses `account/read` to reuse the account that is already active in the installed Codex
+CLI, so the available OpenAI-side visibility depends on that account's authentication mode.
+
+| View | What it shows | What it does not show |
+| --- | --- | --- |
+| **Developer Inspector** in the app | Curated, secret-redacted thread, turn, item, approval, workflow, and Web Search events for the selected run | Every raw JSON-RPC frame, streaming delta, prompt, or response |
+| `<project>/.sharktank/runs/<runId>/events.jsonl` | The persisted secret-redacted event history that backs the Inspector | A lossless wire capture |
+| [OpenAI API Usage](https://platform.openai.com/docs/api-reference/usage) and Costs | Aggregated API activity by dimensions such as project, API key, user, and model when the active Codex authentication uses an OpenAI API key | The local App Server protocol transcript |
+| [ChatGPT Work Compliance API](https://learn.chatgpt.com/docs/enterprise/compliance-api) | Supported auditable Codex records for authorized workspace administrators; the App Server uses `clientInfo.name` (`startup-shark-tank` here) to identify the integration | A byte-for-byte copy of the local stdio messages |
+
+With API-key authentication, the normal OpenAI API Platform can therefore be useful for usage and
+cost attribution, not for debugging this local protocol. Enterprise compliance access is
+workspace- and role-dependent and serves governance and investigation use cases. For day-to-day
+debugging of this project, use the Developer Inspector and its persisted event file. The
+[App Server guide](docs/app-server/README.md#where-can-the-communication-be-inspected) explains the
+boundaries and authentication cases in more detail.
+
 <details>
 <summary><strong>Follow one agent turn</strong></summary>
 
@@ -177,6 +203,7 @@ sequenceDiagram
     participant UI as React renderer
     participant Engine as Workflow engine
     participant Server as Codex App Server
+    participant Web as Codex Web Search
     participant Files as Project files
 
     Engine->>Server: initialize (once per connection)
@@ -185,6 +212,12 @@ sequenceDiagram
     Engine->>Server: thread/start
     Server-->>Engine: thread/started
     Engine->>Server: turn/start
+
+    opt Web Search enabled for this research agent
+        Server->>Web: cached or live search
+        Web-->>Server: untrusted public evidence
+        Server-->>Engine: webSearch item/started · item/completed
+    end
 
     loop streamed work
         Server-->>Engine: item/started · deltas · item/completed
@@ -212,7 +245,7 @@ pnpm codex:generate
 </details>
 
 <details>
-<summary><strong>Workflow and model configuration</strong></summary>
+<summary><strong>Workflow, model, and research configuration</strong></summary>
 
 The workflow sets a default model and concurrency limit:
 
@@ -220,6 +253,7 @@ The workflow sets a default model and concurrency limit:
 defaults:
   model: gpt-5.6-terra
   maxParallelAgents: 2
+  webSearchMode: cached
 ```
 
 An agent can override the model in its Markdown frontmatter:
@@ -230,7 +264,28 @@ model: gpt-5.6-sol
 ---
 ```
 
-The read-only **Configuration** dialog shows the workflow, dependencies, effective model for every agent, available Codex models, expected outputs, and complete agent instructions.
+Research eligibility and the suggested default are declared on the workflow node:
+
+```yaml
+webSearch:
+  allowed: true
+  defaultEnabled: true
+```
+
+Before starting a pitch, expand **Web research** to choose Cached or Live Search and enable the Market Scout and, optionally, the Risk Lead. The exact selection is frozen into `project.json`, so Retry, Resume, and app restarts remain reproducible:
+
+```json
+{
+  "webSearch": {
+    "mode": "cached",
+    "agentIds": ["market"]
+  }
+}
+```
+
+**Cached Search** uses OpenAI's maintained, pre-indexed results without external web access for the query, making it the safer and more stable default. **Live Search** fetches the most recent web data and is better for time-sensitive news, funding, pricing, or regulation, but it has greater exposure to changing and potentially adversarial content. Both modes remain untrusted built-in search inputs and never enable shell networking. See the [Workflow Engine guide](docs/workflow-engine/README.md#cached-search-vs-live-search) for the complete decision flow.
+
+The read-only **Configuration** dialog shows workflow defaults, the effective Web Search mode for the selected pitch, permanent shell-network isolation, dependencies, models, outputs, and complete agent instructions.
 
 </details>
 
@@ -254,8 +309,9 @@ projects/<slug>/
 - Development keeps projects in the repository's `projects/` directory. The installed app stores them under `~/Library/Application Support/Startup Shark Tank/projects/`.
 - State changes are atomic; persisted events are redacted.
 - Completed nodes and human input survive an app restart. Previously running nodes become resumable interruptions.
-- Agent tools can write only inside the pitch project and cannot access the network.
-- Web search and Codex internal subagents are disabled so the visible orchestration belongs entirely to this app.
+- Agent tools can write only inside the pitch project. Shell and file tools always run with network access disabled.
+- Only workflow-allowlisted research agents can use built-in Codex Web Search. Cached Search is the default; Live Search is an explicit per-pitch choice. Retrieved content is treated as untrusted and never grants shell networking.
+- Codex internal subagents, plugins, and MCP servers remain disabled so the visible orchestration belongs entirely to this app.
 - Stopped, waiting, failed, and completed pitches can be moved to the macOS Trash. Active runs must be stopped first.
 
 </details>
@@ -272,7 +328,7 @@ pnpm build
 git diff --check
 ```
 
-For a full walkthrough, complete a CivicRay run, use or edit a generated founder-answer draft, exercise Stop and Resume, inspect both parallel phases, and confirm the final memo and score in the sidebar.
+For a full walkthrough, complete a CivicRay run with the default Cached Search, inspect the Market Scout's redacted `webSearch` events and cited sources, use or edit a generated founder-answer draft, exercise Stop and Resume, inspect both parallel phases, and confirm the final memo and score in the sidebar. A second run can enable Live Search and the Risk Lead to demonstrate per-pitch capability overrides.
 
 This is a local-first macOS app. Release signing and notarization require the distributor's Apple Developer credentials. It intentionally has no database, cloud queue, custom login flow, generic form builder, protocol playground, or synthetic approval probe.
 
@@ -288,4 +344,4 @@ Enjoying Startup Shark Tank or finding it useful? If you would like to support f
 
 Released under the [MIT License](LICENSE).
 
-Official references: [Codex documentation](https://learn.chatgpt.com/docs) · [Codex App Server](https://learn.chatgpt.com/docs/app-server)
+Official references: [Codex documentation](https://learn.chatgpt.com/docs) · [Codex App Server](https://learn.chatgpt.com/docs/app-server) · [Web Search modes](https://learn.chatgpt.com/docs/config-file/config-basic) · [Configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) · [Internet access security](https://learn.chatgpt.com/docs/cloud/internet-access)

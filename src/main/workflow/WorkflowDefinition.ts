@@ -15,6 +15,12 @@ const nodeBase = z.object({
 const agentNode = nodeBase.extend({
   type: z.literal("agent"),
   agent: z.string().min(1),
+  webSearch: z
+    .object({
+      allowed: z.literal(true),
+      defaultEnabled: z.boolean(),
+    })
+    .optional(),
 });
 
 const humanNode = nodeBase.extend({
@@ -35,6 +41,7 @@ const workflowSchema = z.object({
   defaults: z.object({
     model: z.string().min(1),
     maxParallelAgents: z.number().int().min(1).max(8),
+    webSearchMode: z.enum(["cached", "live"]),
   }),
   nodes: z.array(z.discriminatedUnion("type", [agentNode, humanNode])).min(1),
 });

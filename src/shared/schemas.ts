@@ -4,6 +4,15 @@ export const createProjectSchema = z.object({
   name: z.string().trim().min(2).max(80),
   pitch: z.string().trim().min(40).max(12_000),
   targetMarket: z.string().trim().min(2).max(120),
+  webSearch: z.object({
+    mode: z.enum(["cached", "live"]),
+    agentIds: z
+      .array(z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/))
+      .max(8)
+      .refine((ids) => new Set(ids).size === ids.length, {
+        message: "Web Search agent IDs must be unique",
+      }),
+  }),
 });
 
 export const projectIdSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);

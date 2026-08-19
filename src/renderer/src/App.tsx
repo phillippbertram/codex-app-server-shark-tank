@@ -202,6 +202,7 @@ export function App() {
         onOpenChange={setSettingsOpen}
         workflow={workflow}
         models={codex.models ?? []}
+        project={active?.project}
       />
     </div>
   );

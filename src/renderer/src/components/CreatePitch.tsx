@@ -1,17 +1,26 @@
 import sharkTankLogo from "@assets/startup-shark-tank-logo.png";
+import type { WebSearchMode } from "@shared/types";
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight, Bot, Braces, GitBranch, ShieldCheck } from "lucide-react";
+import { ArrowRight, Bot, Braces, GitBranch, Globe2, ShieldCheck } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { defaultPitchPreset, type PitchPreset, pitchPresets } from "../data/pitchPresets";
 import { useAppStore } from "../store/useAppStore";
 import { Badge, Button, Card } from "./ui";
 
 export function CreatePitch() {
-  const { createAndStart, busy, codex } = useAppStore();
+  const { createAndStart, busy, codex, workflow } = useAppStore();
+  const researchAgents =
+    workflow?.nodes.filter((node) => node.type === "agent" && node.webSearch?.allowed) ?? [];
   const [selectedPresetId, setSelectedPresetId] = useState(defaultPitchPreset.id);
   const [name, setName] = useState(defaultPitchPreset.name);
   const [targetMarket, setTargetMarket] = useState(defaultPitchPreset.targetMarket);
   const [pitch, setPitch] = useState(defaultPitchPreset.pitch);
+  const [webSearchMode, setWebSearchMode] = useState<WebSearchMode>(
+    workflow?.defaults.webSearchMode ?? "cached",
+  );
+  const [webSearchAgentIds, setWebSearchAgentIds] = useState<string[]>(() =>
+    researchAgents.filter((node) => node.webSearch?.defaultEnabled).map((node) => node.id),
+  );
 
   const selectPreset = (preset: PitchPreset) => {
     setSelectedPresetId(preset.id);
@@ -22,7 +31,20 @@ export function CreatePitch() {
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    void createAndStart({ name, targetMarket, pitch });
+    void createAndStart({
+      name,
+      targetMarket,
+      pitch,
+      webSearch: { mode: webSearchMode, agentIds: webSearchAgentIds },
+    });
+  };
+
+  const toggleResearchAgent = (agentId: string) => {
+    setWebSearchAgentIds((current) =>
+      current.includes(agentId)
+        ? current.filter((candidate) => candidate !== agentId)
+        : [...current, agentId],
+    );
   };
 
   const features: Array<[LucideIcon, string, string]> = [
@@ -133,6 +155,92 @@ export function CreatePitch() {
                 required
               />
             </label>
+            <details className="group rounded-2xl border border-white/[0.11] bg-white/[0.025]">
+              <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-sky-400/10 text-sky-300">
+                  <Globe2 className="size-4" />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold text-slate-100">Web research</span>
+                  <span className="mt-0.5 block text-[11px] text-slate-400">
+                    {webSearchAgentIds.length
+                      ? `${webSearchAgentIds.length} research agent${webSearchAgentIds.length === 1 ? "" : "s"} · ${webSearchMode}`
+                      : "Disabled for this pitch"}
+                  </span>
+                </span>
+                <span className="ml-auto text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 group-open:hidden">
+                  Configure
+                </span>
+                <span className="ml-auto hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 group-open:inline">
+                  Done
+                </span>
+              </summary>
+              <div className="space-y-4 border-t border-white/[0.09] px-4 py-4">
+                <div>
+                  <span className="field-label">Search mode</span>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {(["cached", "live"] as const).map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        aria-pressed={webSearchMode === mode}
+                        onClick={() => setWebSearchMode(mode)}
+                        className={`rounded-xl border px-3 py-2.5 text-left transition ${
+                          webSearchMode === mode
+                            ? "border-sky-300/45 bg-sky-300/10 text-white"
+                            : "border-white/[0.1] bg-white/[0.03] text-slate-300 hover:border-white/20"
+                        }`}
+                      >
+                        <span className="block text-xs font-semibold capitalize">{mode}</span>
+                        <span className="mt-1 block text-[10px] leading-4 text-slate-400">
+                          {mode === "cached"
+                            ? "OpenAI-maintained search index"
+                            : "Most recent public web results"}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span className="field-label">Research agents</span>
+                  <div className="mt-2 space-y-2">
+                    {researchAgents.map((agent) => {
+                      const enabled = webSearchAgentIds.includes(agent.id);
+                      return (
+                        <button
+                          key={agent.id}
+                          type="button"
+                          role="switch"
+                          aria-checked={enabled}
+                          onClick={() => toggleResearchAgent(agent.id)}
+                          className="flex w-full items-center gap-3 rounded-xl border border-white/[0.1] bg-white/[0.03] px-3 py-2.5 text-left transition hover:border-white/20 hover:bg-white/[0.055]"
+                        >
+                          <span
+                            className={`relative h-5 w-9 rounded-full transition ${enabled ? "bg-sky-400" : "bg-slate-700"}`}
+                          >
+                            <span
+                              className={`absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition ${enabled ? "left-[18px]" : "left-0.5"}`}
+                            />
+                          </span>
+                          <span className="text-xs font-semibold text-slate-200">
+                            {agent.label}
+                          </span>
+                          {agent.webSearch?.defaultEnabled ? (
+                            <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.13em] text-emerald-300">
+                              Recommended
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <p className="rounded-xl border border-amber-300/15 bg-amber-300/[0.06] px-3 py-2.5 text-[10px] leading-4 text-amber-100/80">
+                  Web results are untrusted research input. Agents must ignore instructions found in
+                  retrieved content and never include private project data in queries.
+                </p>
+              </div>
+            </details>
             <Button
               className="w-full"
               size="lg"
@@ -143,7 +251,8 @@ export function CreatePitch() {
               <ArrowRight className="size-4" />
             </Button>
             <p className="text-center text-xs leading-5 text-slate-400">
-              The workflow runs locally. Agent tools have no network access.
+              Selected research agents can use Codex Web Search. Shell and file tools remain
+              network-isolated.
             </p>
           </form>
         </Card>

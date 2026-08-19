@@ -42,6 +42,7 @@ export function Inspector({
             <Meta label="Runtime" value={formatDuration(state.durationMs)} />
             <Meta label="Model" value={state.model ?? "—"} />
             <Meta label="Reasoning" value={state.reasoningEffort ?? "model default"} />
+            <Meta label="Web Search" value={state.webSearchMode ?? "—"} />
           </div>
         ) : null}
       </header>

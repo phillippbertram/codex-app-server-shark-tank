@@ -55,16 +55,7 @@ export class CodexAppServer extends EventEmitter<CodexEvents> {
       const command = await resolveCodexExecutable();
       this.client.start(
         command,
-        [
-          "app-server",
-          "--stdio",
-          "-c",
-          'web_search="disabled"',
-          "-c",
-          "agents.enabled=false",
-          "-c",
-          "mcp_servers={}",
-        ],
+        ["app-server", "--stdio", "-c", "agents.enabled=false", "-c", "mcp_servers={}"],
         this.root,
       );
       const params: InitializeParams = {

@@ -32,6 +32,10 @@ export type WorkflowNodeDefinition = {
   instructions?: string;
   dependsOn: string[];
   outputs: string[];
+  webSearch?: {
+    allowed: true;
+    defaultEnabled: boolean;
+  };
   form?: {
     kind: "question-set" | "long-text";
     source?: string;
@@ -48,8 +52,16 @@ export type WorkflowDefinition = {
   defaults: {
     model: string;
     maxParallelAgents: number;
+    webSearchMode: WebSearchMode;
   };
   nodes: WorkflowNodeDefinition[];
+};
+
+export type WebSearchMode = "cached" | "live";
+
+export type ProjectWebSearch = {
+  mode: WebSearchMode;
+  agentIds: string[];
 };
 
 export type WorkflowNodeState = {
@@ -63,6 +75,7 @@ export type WorkflowNodeState = {
   turnId?: string;
   model?: string;
   reasoningEffort?: string;
+  webSearchMode?: WebSearchMode | "disabled";
   activity?: string;
   error?: string;
 };
@@ -85,6 +98,7 @@ export type ProjectMetadata = {
   workflow: string;
   createdAt: string;
   updatedAt: string;
+  webSearch?: ProjectWebSearch;
 };
 
 export type ProjectSummary = ProjectMetadata & {
@@ -166,6 +180,7 @@ export type CreateProjectInput = {
   name: string;
   pitch: string;
   targetMarket: string;
+  webSearch: ProjectWebSearch;
 };
 
 export type HumanSubmitInput = {

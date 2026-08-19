@@ -33,7 +33,15 @@ export function registerIpc(
   ipcMain.handle(IPC.projectList, () => store.list());
   ipcMain.handle(IPC.projectCreate, async (_event, raw: unknown) => {
     const input = createProjectSchema.parse(raw);
-    return store.create(input.name, input.pitch, input.targetMarket);
+    const eligibleAgents = new Set(
+      store
+        .getWorkflow()
+        .nodes.filter((node) => node.type === "agent" && node.webSearch?.allowed)
+        .map((node) => node.id),
+    );
+    const invalidAgent = input.webSearch.agentIds.find((nodeId) => !eligibleAgents.has(nodeId));
+    if (invalidAgent) throw new Error(`Web Search is not allowed for agent: ${invalidAgent}`);
+    return store.create(input.name, input.pitch, input.targetMarket, input.webSearch);
   });
   ipcMain.handle(IPC.projectDelete, async (_event, raw: unknown) => {
     const projectId = projectIdSchema.parse(raw);

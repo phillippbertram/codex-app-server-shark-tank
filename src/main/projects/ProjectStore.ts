@@ -10,6 +10,7 @@ import type {
   ProjectMetadata,
   ProjectSnapshot,
   ProjectSummary,
+  ProjectWebSearch,
   Question,
   WorkflowDefinition,
   WorkflowState,
@@ -67,7 +68,12 @@ export class ProjectStore {
     return this.workflow;
   }
 
-  async create(name: string, pitch: string, targetMarket: string): Promise<ProjectSnapshot> {
+  async create(
+    name: string,
+    pitch: string,
+    targetMarket: string,
+    webSearch?: ProjectWebSearch,
+  ): Promise<ProjectSnapshot> {
     const baseId = slugify(name) || "startup";
     let id = baseId;
     let suffix = 2;
@@ -90,6 +96,7 @@ export class ProjectStore {
       workflow: this.workflow.id,
       createdAt: now,
       updatedAt: now,
+      webSearch: webSearch ?? this.defaultWebSearch(),
     };
     await this.writeJson(resolve(projectRoot, "project.json"), project);
     await this.atomicWrite(
@@ -140,6 +147,10 @@ export class ProjectStore {
       questions,
       events,
     };
+  }
+
+  async projectMetadata(projectId: string): Promise<ProjectMetadata> {
+    return this.readMetadata(projectId);
   }
 
   projectRoot(projectId: string): string {
@@ -208,6 +219,15 @@ export class ProjectStore {
     return JSON.parse(
       await readFile(this.resolveProjectPath(projectId, "project.json"), "utf8"),
     ) as ProjectMetadata;
+  }
+
+  private defaultWebSearch(): ProjectWebSearch {
+    return {
+      mode: this.workflow.defaults.webSearchMode,
+      agentIds: this.workflow.nodes
+        .filter((node) => node.webSearch?.defaultEnabled)
+        .map((node) => node.id),
+    };
   }
 
   private async listArtifacts(projectId: string): Promise<ArtifactSummary[]> {

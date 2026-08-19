@@ -5,11 +5,15 @@ source: workflows/shark-tank.yaml
 defaults:
   model: gpt-5.6-terra
   maxParallelAgents: 2
+  webSearchMode: cached
 nodes:
   - id: market
     label: Market Scout
     type: agent
     agent: shark-tank/market-scout.md
+    webSearch:
+      allowed: true
+      defaultEnabled: true
     dependsOn: []
     outputs:
       - artifacts/market.md
@@ -36,6 +40,9 @@ nodes:
     label: Risk & Diligence Lead
     type: agent
     agent: shark-tank/risk-skeptic.md
+    webSearch:
+      allowed: true
+      defaultEnabled: false
     dependsOn:
       - business
       - product

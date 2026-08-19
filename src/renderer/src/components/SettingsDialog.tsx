@@ -1,5 +1,20 @@
-import type { CodexModelSummary, WorkflowDefinition, WorkflowNodeDefinition } from "@shared/types";
-import { Bot, BrainCircuit, FileCode2, GitBranch, LockKeyhole, UsersRound } from "lucide-react";
+import type {
+  CodexModelSummary,
+  ProjectMetadata,
+  WebSearchMode,
+  WorkflowDefinition,
+  WorkflowNodeDefinition,
+} from "@shared/types";
+import {
+  Bot,
+  BrainCircuit,
+  FileCode2,
+  GitBranch,
+  Globe2,
+  LockKeyhole,
+  UsersRound,
+  WifiOff,
+} from "lucide-react";
 import { Badge, Card, Dialog } from "./ui";
 import { WorkflowRoadmap } from "./WorkflowDashboard";
 
@@ -8,11 +23,13 @@ export function SettingsDialog({
   onOpenChange,
   workflow,
   models,
+  project,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workflow?: WorkflowDefinition;
   models: CodexModelSummary[];
+  project?: ProjectMetadata;
 }) {
   const agents = workflow?.nodes.filter((node) => node.type === "agent") ?? [];
   const humanGates = workflow?.nodes.filter((node) => node.type === "human-input") ?? [];
@@ -54,12 +71,14 @@ export function SettingsDialog({
                   <Setting label="Source" value={workflow.source} mono />
                   <Setting label="Workflow ID" value={workflow.id} mono />
                   <Setting label="Default model" value={workflow.defaults.model} mono />
+                  <Setting label="Default Web Search" value={workflow.defaults.webSearchMode} />
                   <Setting
                     label="Parallel agents"
                     value={String(workflow.defaults.maxParallelAgents)}
                   />
                   <Setting label="Agent nodes" value={String(agents.length)} />
                   <Setting label="Human gates" value={String(humanGates.length)} />
+                  <Setting label="Shell network" value="Off" />
                 </div>
                 <div className="mt-5 border-t border-white/[0.1] pt-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
@@ -96,6 +115,49 @@ export function SettingsDialog({
                       The catalog appears after the App Server connects.
                     </p>
                   )}
+                </div>
+              </Card>
+            </section>
+
+            <section>
+              <Card className="border-sky-400/15 bg-sky-400/[0.035] p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sky-400/10 text-sky-300">
+                      <Globe2 className="size-4" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-sky-300">
+                        Research access
+                      </p>
+                      <h2 className="mt-2 text-lg font-semibold text-white">
+                        {project ? `Effective for ${project.name}` : "Defaults for new pitches"}
+                      </h2>
+                      <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
+                        Web Search is selected before a pitch starts and stays fixed for retries and
+                        resumed runs. Retrieved pages are treated as untrusted research input.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/15 bg-emerald-400/[0.07] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.13em] text-emerald-200">
+                    <WifiOff className="size-3.5" /> Shell network off
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {agents
+                    .filter((agent) => agent.webSearch?.allowed)
+                    .map((agent) => {
+                      const mode = effectiveWebSearch(agent, workflow, project);
+                      return (
+                        <span
+                          key={agent.id}
+                          className="rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-1.5 text-xs text-slate-300"
+                        >
+                          {agent.label}:{" "}
+                          <strong className="capitalize text-slate-100">{mode}</strong>
+                        </span>
+                      );
+                    })}
                 </div>
               </Card>
             </section>
@@ -141,6 +203,7 @@ export function SettingsDialog({
                     key={agent.id}
                     agent={agent}
                     defaultModel={workflow.defaults.model}
+                    webSearchMode={effectiveWebSearch(agent, workflow, project)}
                     modelStatus={
                       models.length === 0
                         ? "unknown"
@@ -163,10 +226,12 @@ function AgentCard({
   agent,
   defaultModel,
   modelStatus,
+  webSearchMode,
 }: {
   agent: WorkflowNodeDefinition;
   defaultModel: string;
   modelStatus: "available" | "unavailable" | "unknown";
+  webSearchMode: WebSearchMode | "disabled";
 }) {
   const effectiveModel = agent.model ?? defaultModel;
   return (
@@ -182,15 +247,27 @@ function AgentCard({
               <code className="mt-1 block truncate text-[10px] text-slate-400">{agent.agent}</code>
             </div>
           </div>
-          <Badge
-            className={
-              agent.model
-                ? "border-violet-400/20 bg-violet-400/10 text-violet-200"
-                : "border-sky-400/20 bg-sky-400/10 text-sky-200"
-            }
-          >
-            {agent.model ? "Override" : "Inherited"}
-          </Badge>
+          <div className="flex shrink-0 flex-col items-end gap-2">
+            <Badge
+              className={
+                agent.model
+                  ? "border-violet-400/20 bg-violet-400/10 text-violet-200"
+                  : "border-sky-400/20 bg-sky-400/10 text-sky-200"
+              }
+            >
+              {agent.model ? "Override" : "Inherited"}
+            </Badge>
+            <Badge
+              className={
+                webSearchMode === "disabled"
+                  ? "border-white/[0.1] bg-white/[0.04] text-slate-400"
+                  : "border-sky-400/20 bg-sky-400/10 text-sky-200"
+              }
+            >
+              <Globe2 className="mr-1 size-3" />
+              {webSearchMode === "disabled" ? "Web search off" : `${webSearchMode} search`}
+            </Badge>
+          </div>
         </div>
 
         <div className="mt-5 grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-xs">
@@ -233,6 +310,18 @@ function AgentCard({
       </details>
     </Card>
   );
+}
+
+function effectiveWebSearch(
+  agent: WorkflowNodeDefinition,
+  workflow: WorkflowDefinition,
+  project?: ProjectMetadata,
+): WebSearchMode | "disabled" {
+  if (!agent.webSearch?.allowed) return "disabled";
+  if (project) {
+    return project.webSearch?.agentIds.includes(agent.id) ? project.webSearch.mode : "disabled";
+  }
+  return agent.webSearch.defaultEnabled ? workflow.defaults.webSearchMode : "disabled";
 }
 
 function ModelRow({ model }: { model: CodexModelSummary }) {
